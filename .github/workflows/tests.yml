@@ -52,15 +52,9 @@ jobs:
         run: composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
 
       - name: Tests on Ubuntu OS
-        if: matrix.os == 'ubuntu-latest'
         run: XDEBUG_MODE=coverage vendor/bin/pest --coverage --coverage-clover coverage.xml
 
-      - name: Tests on Windows OS
-        if: matrix.os == 'windows-latest'
-        run: vendor/bin/pest
-
       - name: Upload coverage reports to Codecov
-        if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
