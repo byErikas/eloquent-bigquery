@@ -2,7 +2,7 @@
 
 use ByErikas\EloquentBigQuery\Builder;
 
-it("#1 can generate basic select from SQL", function () {
+it("can generate basic select from SQL with dates, offset, limit and aliases", function () {
     $start = now();
     $end = now()->addMonth();
 

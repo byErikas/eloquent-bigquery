@@ -2,9 +2,9 @@
 
 namespace ByErikas\EloquentBigQuery\Traits;
 
-use App\Models\Configuration;
 use ByErikas\EloquentBigQuery\Exceptions\InvalidSelect;
 use ByErikas\EloquentBigQuery\Exceptions\UndefinedMetric;
+use ByErikas\EloquentBigQuery\Facades\MetricsRepository;
 use ByErikas\EloquentBigQuery\Join;
 use ByErikas\EloquentBigQuery\Where;
 use Closure;
@@ -136,10 +136,8 @@ trait BuildsSQLStatements
                 throw new InvalidSelect("Select can't be \"*\" when using \"selectMetrics\".");
             }
 
-            $allMetrics = Configuration::cacheForever()->firstWhere("key", "bigquery_metrics");
-
             foreach ($this->selectMetrics as $metricKeyword) {
-                $metric = $allMetrics->data->firstWhere("identifier", $metricKeyword);
+                $metric = MetricsRepository::find($metricKeyword);
 
                 if (!$metric) {
                     throw new UndefinedMetric("Metric \"{$metricKeyword}\" not found!");
