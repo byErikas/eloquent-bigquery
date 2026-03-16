@@ -139,11 +139,11 @@ trait BuildsSQLStatements
             foreach ($this->selectMetrics as $metricKeyword) {
                 $metric = MetricsRepository::find($metricKeyword);
 
-                if (!$metric) {
-                    throw new UndefinedMetric("Metric \"{$metricKeyword}\" not found!");
+                if (!$metric || !isset($metric["value"])) {
+                    throw new UndefinedMetric("Metric \"{$metricKeyword}\" not found, or is of invalid format!");
                 }
 
-                $select[] = "{$metric["formula"]} AS {$metricKeyword}";
+                $select[] = "{$metric["value"]} AS {$metricKeyword}";
             }
         }
 

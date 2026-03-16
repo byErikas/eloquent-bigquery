@@ -26,12 +26,15 @@ As well as register any custom / complex select metrics that you may be storing 
 ```php
 use ByErikas\EloquentBigQuery\Facades\MetricsRepository;
 
-MetricsRepository::from([["keyword" => "metric", "formula" => "ROUND(..."]]);
+MetricsRepository::from([["keyword" => "metric-1", "value" => "ROUND(..."]]);
 ```
-the `MetricsRepository::from()` method accepts arrays and Collections, that have the following structure inside:
+the `MetricsRepository::from()` method accepts array of arrays or a Collection of arrays, and must have the following structure:
 ```php
 $metrics = [
-  ["keyword" => "metric_keyword", "formula" => "ROUND(..."]
+  [
+    "keyword" => "metric-1", 
+    "value" => "ROUND(..."
+  ]
 ];
 ```
-`keyword` is used to get the metric, and as the metric's alias in SQL, and the `formula` defines the actual SQL that is inserted.
+`keyword` is used to get the metric, and as the metric's alias in SQL, and the `value` defines the actual SQL that is inserted.
