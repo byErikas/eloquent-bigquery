@@ -1,0 +1,66 @@
+name: tests
+
+on:   
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "The branch, tag or SHA to checkout"     
+        required: true
+        default: "v1.x.x"
+  pull_request:
+    branches:
+      - v*.*.*
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    permissions:
+      packages: write
+      contents: read
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest]
+        php: [8.4, 8.5]
+        dependency-version: [prefer-lowest, prefer-stable]
+
+    name: PHP${{ matrix.php }} - ${{ matrix.dependency-version }} - ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.ref }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: xdebug
+
+      - name: Get Composer Cache Directory
+        id: composer
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Composer Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer.outputs.dir }}
+          key: ${{ matrix.os }}-composer-${{ matrix.php }}-${{ matrix.dependency-version }}-${{ hashFiles('composer.json') }}
+
+      - name: Composer Update
+        run: composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
+
+      - name: Tests on Ubuntu OS
+        if: matrix.os == 'ubuntu-latest'
+        run: XDEBUG_MODE=coverage vendor/bin/pest --coverage --coverage-clover coverage.xml
+
+      - name: Tests on Windows OS
+        if: matrix.os == 'windows-latest'
+        run: vendor/bin/pest
+
+      - name: Upload coverage reports to Codecov
+        if: matrix.os == 'ubuntu-latest'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
