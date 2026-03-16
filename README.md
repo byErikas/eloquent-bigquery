@@ -14,16 +14,24 @@ The package can be installed using:
 ```
 composer require byerikas/eloquent-bigquery
 ```
+
+# Configuration
 Before using it's recommended to define the default BigQuery client config in your `AppServiceProvider.php`:
-```
+```php
 use ByErikas\EloquentBigQuery\Facades\QueryService;
 
 QueryService::setClientConfig(["keyFile" => ...]);
 ```
 As well as register any custom / complex select metrics that you may be storing elsewhere:
-```
+```php
 use ByErikas\EloquentBigQuery\Facades\MetricsRepository;
 
 MetricsRepository::from([["keyword" => "metric", "formula" => "ROUND(..."]]);
 ```
-
+the `MetricsRepository::from()` method accepts arrays and Collections, that have the following structure inside:
+```php
+$metrics = [
+  ["keyword" => "metric_keyword", "formula" => "ROUND(..."]
+];
+```
+`keyword` is used to get the metric, and as the metric's alias in SQL, and the `formula` defines the actual SQL that is inserted.
