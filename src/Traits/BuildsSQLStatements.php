@@ -128,11 +128,11 @@ trait BuildsSQLStatements
         }
 
         if (is_object($start) && $start instanceof Carbon) {
-            $start = $start->format("Y-m-d H:i:s");
+            $start = "\"{$start->format("Y-m-d H:i:s")}\"";
         }
 
         if (is_object($end) && $end instanceof Carbon) {
-            $end = $end->format("Y-m-d H:i:s");
+            $end = "\"{$end->format("Y-m-d H:i:s")}\"";
         }
 
         return "{$column} BETWEEN {$start} AND {$end}";
