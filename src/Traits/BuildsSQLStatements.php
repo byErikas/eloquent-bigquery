@@ -103,6 +103,26 @@ trait BuildsSQLStatements
 
     private function buildWhereBetween(string $column, string|Carbon $start, string|Carbon $end, ?string $boolean = "and"): string
     {
+        $shouldEscapeStart = !is_object($start)
+            && !str_contains($start, self::ACCESS_OPERATOR)
+            && !is_numeric($start)
+            && !is_null($start)
+            && !is_bool($start);
+
+        if ($shouldEscapeStart) {
+            $start = "\"{$start}\"";
+        }
+
+        $shouldEscapeEnd = !is_object($end)
+            && !str_contains($end, self::ACCESS_OPERATOR)
+            && !is_numeric($end)
+            && !is_null($end)
+            && !is_bool($end);
+
+        if ($shouldEscapeEnd) {
+            $start = "\"{$end}\"";
+        }
+
         if ($boolean) {
             $column = strtoupper($boolean) . " {$column}";
         }
@@ -113,24 +133,6 @@ trait BuildsSQLStatements
 
         if (is_object($end) && $end instanceof Carbon) {
             $end = $end->format("Y-m-d H:i:s");
-        }
-
-        $shouldEscapeStart = !str_contains($start, self::ACCESS_OPERATOR)
-            && !is_numeric($start)
-            && !is_null($start)
-            && !is_bool($start);
-
-        if ($shouldEscapeStart) {
-            $start = "\"{$start}\"";
-        }
-
-        $shouldEscapeEnd = !str_contains($end, self::ACCESS_OPERATOR)
-            && !is_numeric($end)
-            && !is_null($end)
-            && !is_bool($end);
-
-        if ($shouldEscapeEnd) {
-            $start = "\"{$end}\"";
         }
 
         return "{$column} BETWEEN {$start} AND {$end}";
