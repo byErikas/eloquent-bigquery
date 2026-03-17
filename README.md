@@ -7,8 +7,66 @@
   <a href="https://github.com/byErikas/eloquent-bigquery/blob/v1.x.x/LICENSE"><img src="https://img.shields.io/github/license/byerikas/eloquent-bigquery" alt="GitHub License"></a>
 </p>
 
-Simple BigQuery SQL generator and query service in the syntax style of Laravel's Eloquent for Google BigQuery.
+Simple select SQL generator and query service in the syntax style of Laravel's Eloquent for Google BigQuery.
 
+# Usage
+Queries can be built using the provided `Builder` facade:
+```php
+use ByErikas\EloquentBigQuery\Builder;
+
+$query = Builder::table("test", "table_alias")
+  ->select(["column AS column_alias"])
+  ->where("columnA", "value")
+  ->whereIn("columnB", [1, 2, 3])
+  ->whereBetween("columnC", 1, 10)
+  ->limit(10)
+  ->offset(5)
+  ->orderBy("column_alias", "desc");
+```
+
+And their SQL can be returned by using the `toSQL` method:
+```php
+$query = Builder::table("test")
+  ->select(["column", "column2"])
+  ->whereBetween("column", 1, 2);
+
+$sql = $query->toSQL(); //returns: "SELECT column, column2 FROM `test` WHERE column BETWEEN 1 AND 2"
+```
+
+Executing the queries can be done using the `QueryService` facade:
+```php
+use ByErikas\EloquentBigQuery\Facades\QueryService;
+
+$result = QueryService::query($query)->execute();
+
+//multiple queries are supported
+$results = QueryService::query([$queryA, $queryB])->execute();
+```
+
+Selecting predefined columns or aggregations on queries can be done using `selectMetrics` method:
+```php
+Builder::table("test")->selectMetrics(["metric-1"]);
+```
+
+Joins and more complex where statements are supported by using various `join` methods, and by passing a function to the first parameter of `where`:
+```php
+use ByErikas\EloquentBigQuery\Where;
+
+Builder::table("test")
+  ->select(["column"])
+  ->where(function (Where $query) {
+    $query->whereIn("columnA", [1, 2, 3])
+      ->whereBetween("columnB", "1000-01-01", "2000-01-01", "or");
+  });
+
+use ByErikas\EloquentBigQuery\Join;
+
+Builder::table("test")
+  ->select(["column"])
+  ->join("test1", "t1", function (Join $query) {
+    $query->where("time", "test.time");
+  });
+```
 # Installation
 The package can be installed using:
 ```
