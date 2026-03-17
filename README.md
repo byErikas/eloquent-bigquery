@@ -20,13 +20,27 @@ Before using it's recommended to define the default BigQuery client config in yo
 ```php
 use ByErikas\EloquentBigQuery\Facades\QueryService;
 
-QueryService::setClientConfig(["keyFile" => ...]);
+public function boot(): void {
+
+  //...
+
+  QueryService::setClientConfig(["keyFile" => ...]);
+
+  //...
+}
 ```
 As well as register any custom / complex select metrics that you may be storing elsewhere:
 ```php
 use ByErikas\EloquentBigQuery\Facades\MetricsRepository;
 
-MetricsRepository::from([["keyword" => "metric-1", "value" => "ROUND(..."]]);
+public function boot(): void {
+
+  //...
+
+  MetricsRepository::from([["keyword" => "metric-1", "value" => "ROUND(..."]]);
+
+  //...
+}
 ```
 the `MetricsRepository::from()` method accepts array of arrays or a Collection of arrays, and must have the following structure:
 ```php
