@@ -73,7 +73,7 @@ composer require byerikas/eloquent-bigquery
 ```
 
 # Configuration
-Before using it's recommended to define the default BigQuery client config in your `AppServiceProvider.php`:
+Before usage it's recommended to define the default BigQuery client config in your `AppServiceProvider.php`:
 ```php
 use ByErikas\EloquentBigQuery\Facades\QueryService;
 
@@ -86,7 +86,7 @@ public function boot(): void {
   //...
 }
 ```
-As well as register any custom / complex select metrics that you may be storing elsewhere:
+As well as register any custom / complex select metrics or aggregations that you may be storing elsewhere:
 ```php
 use ByErikas\EloquentBigQuery\Facades\MetricsRepository;
 
