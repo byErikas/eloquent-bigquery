@@ -1,6 +1,6 @@
 {
     "name": "byerikas/eloquent-bigquery",
-    "description": "Simple BigQuery wrapper in the style of Laravel's Eloquent",
+    "description": "Simple select SQL generator and query service in the syntax style of Laravel's Eloquent for Google BigQuery.",
     "keywords": [
         "bigquery",
         "eloquent",
