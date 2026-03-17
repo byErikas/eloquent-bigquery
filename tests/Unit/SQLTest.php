@@ -13,7 +13,7 @@ it("can set and get client config", function () {
 });
 
 it("can set metrics to repository and get metrics from it", function () {
-    MetricsRepository::from(collect(["keyword" => "test", "value" => "SUM(*)"]));
+    MetricsRepository::from(collect([["keyword" => "test", "value" => "SUM(*)"]]));
 
     expect(MetricsRepository::all())->toBe([["keyword" => "test", "value" => "SUM(*)"]]);
 
