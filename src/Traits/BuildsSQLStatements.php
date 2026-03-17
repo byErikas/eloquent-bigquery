@@ -147,6 +147,47 @@ trait BuildsSQLStatements
         return $join;
     }
 
+    private function buildHavingMetric(string $metric, mixed $operator = null, mixed $value = null, ?string $boolean = "and"): string
+    {
+        $metricData = MetricsRepository::find($metric);
+
+        if (!$metricData || !isset($metricData["value"])) {
+            throw new UndefinedMetric("Metric \"{$metric}\" not found, or is of invalid format!");
+        }
+
+        $column = $metric["value"];
+
+        if ($boolean) {
+            $column = strtoupper($boolean) . " {$metric["value"]}";
+        }
+
+        $isOperator = in_array(strtoupper($operator), self::COMPARISON_OPERATORS);
+
+        $actualValue = $value;
+
+        if (!$isOperator) {
+            $actualValue = $operator;
+        }
+
+        $shouldEscapeValue = !str_contains($actualValue, self::ACCESS_OPERATOR)
+            && !is_numeric($actualValue)
+            && !is_null($actualValue)
+            && !is_bool($actualValue);
+
+        if ($shouldEscapeValue) {
+            $actualValue = "\"{$actualValue}\"";
+        }
+
+        if (!$isOperator) {
+            return match ($actualValue) {
+                null => "{$column} IS NULL",
+                default => "{$column} = {$actualValue}"
+            };
+        }
+
+        return "{$column} {$operator} {$actualValue}";
+    }
+
     private function buildSelect(): string
     {
         $select = $this->select;
@@ -205,6 +246,15 @@ trait BuildsSQLStatements
         }
 
         return "GROUP BY " . implode(", ", $this->groupBy);
+    }
+
+    private function buildHavings(): ?string
+    {
+        if (empty($this->havings)) {
+            return null;
+        }
+
+        return implode(" ", $this->havings);
     }
 
     private function buildOrders(): ?string

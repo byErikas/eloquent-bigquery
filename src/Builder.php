@@ -30,6 +30,8 @@ class Builder
 
     private array $orders = [];
 
+    private array $havings = [];
+
     public function __construct(null|Builder|string $table = null, ?string $alias = null)
     {
         if ($table) {
@@ -197,6 +199,28 @@ class Builder
         return $this;
     }
 
+    public function having(string|Closure $column, mixed $operator = null, mixed $value = null, string $boolean = "and"): self
+    {
+        if (!count($this->havings)) {
+            $boolean = "having";
+        }
+
+        $this->havings[] = $this->buildWhere($column, $operator, $value, $boolean);
+
+        return $this;
+    }
+
+    public function havingMetric(string $metric, mixed $operator = null, mixed $value = null, string $boolean = "and"): self
+    {
+        if (!count($this->havings)) {
+            $boolean = "having";
+        }
+
+        $this->havings[] = $this->buildHavingMetric($metric, $operator, $value, $boolean);
+
+        return $this;
+    }
+
     public function toSQL(): string
     {
         $sql = "SELECT {$this->buildSelect()} FROM {$this->buildFrom()}";
@@ -205,6 +229,7 @@ class Builder
             $this->buildJoins(),
             $this->buildWheres(),
             $this->buildGroupBy(),
+            $this->buildHavings(),
             $this->buildOrders(),
             $this->buildLimit(),
             $this->buildOffset(),
