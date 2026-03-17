@@ -53,7 +53,7 @@ it("can generate advanced wheres", function () {
 });
 
 it("can generate join and subquery", function () {
-    MetricsRepository::from(collect(["keyword" => "test", "value" => "SUM(*)"]));
+    MetricsRepository::from(collect([["keyword" => "test", "value" => "SUM(*)"]]));
 
     $queryA = Builder::table("test")
         ->select(["column"])
