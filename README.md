@@ -39,8 +39,7 @@ use ByErikas\EloquentBigQuery\Facades\QueryService;
 
 $result = QueryService::query($query)->execute();
 
-//multiple queries are supported
-$results = QueryService::query([$queryA, $queryB])->execute();
+[$resultsA, $resultsB] = QueryService::query([$queryA, $queryB])->execute(); //multiple queries are supported
 ```
 
 Selecting predefined columns or aggregations on queries can be done using `selectMetrics` method:
