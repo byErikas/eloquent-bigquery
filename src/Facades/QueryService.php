@@ -6,12 +6,12 @@ use ByErikas\EloquentBigQuery\QueryService as BigQueryQueryService;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static \App\Services\BigQuery\QueryService setClientConfig(array $config)
+ * @method static \ByErikas\EloquentBigQuery\QueryService setClientConfig(array $config)
  * @method static array getClientConfig()
- * @method static \App\Services\BigQuery\QueryService query(array|\App\Services\BigQuery\Builder $query)
+ * @method static \ByErikas\EloquentBigQuery\QueryService query(array|\ByErikas\EloquentBigQuery\Builder $query)
  * @method static null|array|QueryResults execute()
  *
- * @see \App\Services\BigQuery\QueryService
+ * @see \ByErikas\EloquentBigQuery\QueryService
  */
 class QueryService extends Facade
 {

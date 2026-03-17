@@ -2,15 +2,15 @@
 
 namespace ByErikas\EloquentBigQuery\Facades;
 
-use App\Services\BigQuery\MetricsRepository as BigQueryMetricsRepository;
+use ByErikas\EloquentBigQuery\MetricsRepository as BigQueryMetricsRepository;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static \App\Services\BigQuery\QueryService from(array|\Illuminate\Support\Collection $metrics)
+ * @method static \ByErikas\EloquentBigQuery\QueryService from(array|\Illuminate\Support\Collection $metrics)
  * @method static array all()
  * @method static ?array find($string $keyword)
  *
- * @see \App\Services\BigQuery\MetricsRepository
+ * @see \ByErikas\EloquentBigQuery\MetricsRepository
  */
 class MetricsRepository extends Facade
 {
