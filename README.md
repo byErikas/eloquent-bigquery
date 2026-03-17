@@ -55,7 +55,7 @@ use ByErikas\EloquentBigQuery\Where;
 Builder::table("test")
   ->select(["column"])
   ->where(function (Where $query) {
-    $query->whereIn("columnA", [1, 2, 3])
+    $query->where("columnA", true)
       ->whereBetween("columnB", "1000-01-01", "2000-01-01", "or");
   });
 
