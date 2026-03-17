@@ -93,3 +93,23 @@ it("can generate complex where", function () {
 
     expect($sql)->toBe("SELECT column, column2 FROM `test` WHERE (value BETWEEN 1 AND 100)");
 });
+
+it("can remove empty wheres, and prefix where when needed", function () {
+    $sql = Builder::table("test")
+        ->select(["column", "column2"])
+        ->whereIn("column", []);
+
+    expect($sql)->toBe("SELECT column, column2 FROM `test`");
+
+    $sql = Builder::table("test")
+        ->select(["column", "column2"])
+        ->whereIn("column", [1, 2]);
+
+    expect($sql)->toBe("SELECT column, column2 FROM `test` WHERE column IN (1, 2)");
+
+    $sql = Builder::table("test")
+        ->select(["column", "column2"])
+        ->whereBetween("column", 1, 2);
+
+    expect($sql)->toBe("SELECT column, column2 FROM `test` WHERE column BETWEEN 1 AND 2");
+});
