@@ -14,7 +14,7 @@ class Builder
 
     private ?string $alias = null;
 
-    private array $select = ["*"];
+    private array $select = [];
 
     private array $selectMetrics = [];
 

@@ -66,7 +66,7 @@ it("can generate join and subquery", function () {
         ->selectMetrics(["test"])
         ->whereNotNull("qa.time");
 
-    expect($queryB->toSQL())->toBe("SELECT column, SUM(*) AS test FROM (SELECT column FROM `test` LEFT JOIN `test2` t2 ON t2.time = test.time AND t2.time BETWEEN \"1000-01-01\" AND \"2000-01-01\") qa WHERE qa.time IS NOT NULL");
+    expect($queryB->toSQL())->toBe("SELECT SUM(*) AS test FROM (SELECT column FROM `test` LEFT JOIN `test2` t2 ON t2.time = test.time AND t2.time BETWEEN \"1000-01-01\" AND \"2000-01-01\") qa WHERE qa.time IS NOT NULL");
 });
 
 it("can generate query jobs", function () {
