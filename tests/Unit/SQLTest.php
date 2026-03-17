@@ -72,7 +72,7 @@ it("can generate ordered and grouped sqls", function () {
         ->groupBy(["column"])
         ->toSQL();
 
-    expect($sql)->toBe("SELECT column, column2 FROM `test` ORDER BY column DESC, column2, column3 ASC");
+    expect($sql)->toBe("SELECT column, column2 FROM `test` GROUP BY column ORDER BY column DESC, column2, column3 ASC");
 });
 
 it("can generate complex where", function () {
