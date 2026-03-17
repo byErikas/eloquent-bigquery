@@ -120,7 +120,7 @@ trait BuildsSQLStatements
             && !is_bool($end);
 
         if ($shouldEscapeEnd) {
-            $start = "\"{$end}\"";
+            $end = "\"{$end}\"";
         }
 
         if ($boolean) {
