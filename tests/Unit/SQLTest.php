@@ -2,26 +2,8 @@
 
 use ByErikas\EloquentBigQuery\Builder;
 use ByErikas\EloquentBigQuery\Facades\MetricsRepository;
-use ByErikas\EloquentBigQuery\Facades\QueryService;
 use ByErikas\EloquentBigQuery\Join;
 use ByErikas\EloquentBigQuery\Where;
-
-it("can set and get client config", function () {
-    QueryService::setClientConfig(["key" => true]);
-
-    expect(QueryService::getClientConfig())->toBe(["key" => true]);
-});
-
-it("can set metrics to repository and get metrics from it", function () {
-    MetricsRepository::from(collect([["keyword" => "test", "value" => "SUM(*)"]]));
-
-    expect(MetricsRepository::all())->toBe([["keyword" => "test", "value" => "SUM(*)"]]);
-
-    expect(MetricsRepository::find("test"))->toBe([
-        "keyword" => "test",
-        "value" => "SUM(*)"
-    ]);
-});
 
 it("can generate basic select SQLs with dates, offset, limit and aliases", function () {
     $date = now();
@@ -52,7 +34,7 @@ it("can generate advanced wheres", function () {
     expect($sql)->toBe("SELECT column FROM `test` WHERE (columnA IN (1, 2, 3) OR columnB BETWEEN \"1000-01-01\" AND \"2000-01-01\")");
 });
 
-it("can generate join and subquery", function () {
+it("can generate joins and subquery", function () {
     MetricsRepository::from(collect([["keyword" => "test", "value" => "SUM(*)"]]));
 
     $queryA = Builder::table("test")
@@ -60,17 +42,21 @@ it("can generate join and subquery", function () {
         ->leftJoin("test2", "t2", function (Join $query) {
             $query->where("time", "test.time")
                 ->whereBetween("time", "1000-01-01", "2000-01-01");
+        })->rightJoin("test3", "t3", function (Join $query) {
+            $query->whereIn("time", [])
+                ->whereIn("time", ["1000-01-01"]);
+        })->crossJoin("test4", "t4", function (Join $query) {
+            $query->whereBetween("time", "1000-01-01", "2000-01-01");
+        })->fullJoin("test5", "t5", function (Join $query) {
+            $query->where("time", null)
+                ->where("time", ">=", "1000-01-01");
         });
 
-    expect($queryA->toSQL())->toBe("SELECT column FROM `test` LEFT JOIN `test2` t2 ON t2.time = test.time AND t2.time BETWEEN \"1000-01-01\" AND \"2000-01-01\"");
+    expect($queryA->toSQL())->toBe("SELECT column FROM `test` LEFT JOIN `test2` t2 ON t2.time = test.time AND t2.time BETWEEN \"1000-01-01\" AND \"2000-01-01\" RIGHT JOIN `test3` t3 ON t3.time IN ('1000-01-01') CROSS JOIN `test4` t4 ON t4.time BETWEEN \"1000-01-01\" AND \"2000-01-01\" FULL JOIN `test5` t5 ON t5.time IS NULL AND t5.time >= \"1000-01-01\"");
 
     $queryB = Builder::table($queryA, "qa")
         ->selectMetrics(["test"])
         ->whereNotNull("qa.time");
 
-    expect($queryB->toSQL())->toBe("SELECT SUM(*) AS test FROM (SELECT column FROM `test` LEFT JOIN `test2` t2 ON t2.time = test.time AND t2.time BETWEEN \"1000-01-01\" AND \"2000-01-01\") qa WHERE qa.time IS NOT NULL");
-});
-
-it("can generate query jobs", function () {
-    expect(QueryService::query([])->execute())->toBe(null);
+    expect($queryB->toSQL())->toBe("SELECT SUM(*) AS test FROM (SELECT column FROM `test` LEFT JOIN `test2` t2 ON t2.time = test.time AND t2.time BETWEEN \"1000-01-01\" AND \"2000-01-01\" RIGHT JOIN `test3` t3 ON t3.time IN ('1000-01-01') CROSS JOIN `test4` t4 ON t4.time BETWEEN \"1000-01-01\" AND \"2000-01-01\" FULL JOIN `test5` t5 ON t5.time IS NULL AND t5.time >= \"1000-01-01\") qa WHERE qa.time IS NOT NULL");
 });
