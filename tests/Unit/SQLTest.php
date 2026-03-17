@@ -38,7 +38,9 @@ it("can generate joins and subquery", function () {
 
     $queryA = Builder::table("test")
         ->select(["column"])
-        ->leftJoin("test2", "t2", function (Join $query) {
+        ->join("test1", "t1", function (Join $query) {
+            $query->where("time", "test.time");
+        })->leftJoin("test2", "t2", function (Join $query) {
             $query->where("time", "test.time")
                 ->whereBetween("time", "1000-01-01", "2000-01-01");
         })->rightJoin("test3", "t3", function (Join $query) {
@@ -51,24 +53,43 @@ it("can generate joins and subquery", function () {
                 ->where("time", ">=", "1000-01-01");
         });
 
-    expect($queryA->toSQL())->toBe("SELECT column FROM `test` LEFT JOIN `test2` t2 ON t2.time = test.time AND t2.time BETWEEN \"1000-01-01\" AND \"2000-01-01\" RIGHT JOIN `test3` t3 ON t3.time IN ('1000-01-01') CROSS JOIN `test4` t4 ON t4.time BETWEEN \"1000-01-01\" AND \"2000-01-01\" FULL JOIN `test5` t5 ON t5.time IS NULL AND t5.time >= \"1000-01-01\"");
+    expect($queryA->toSQL())->toBe("SELECT column FROM `test` INNER JOIN `test1` t1 ON t1.time = test.time LEFT JOIN `test2` t2 ON t2.time = test.time AND t2.time BETWEEN \"1000-01-01\" AND \"2000-01-01\" RIGHT JOIN `test3` t3 ON t3.time IN ('1000-01-01') CROSS JOIN `test4` t4 ON t4.time BETWEEN \"1000-01-01\" AND \"2000-01-01\" FULL JOIN `test5` t5 ON t5.time IS NULL AND t5.time >= \"1000-01-01\"");
 
     $queryB = Builder::table($queryA, "qa")
         ->selectMetrics(["test"])
         ->whereNotNull("qa.time");
 
-    expect($queryB->toSQL())->toBe("SELECT SUM(*) AS test FROM (SELECT column FROM `test` LEFT JOIN `test2` t2 ON t2.time = test.time AND t2.time BETWEEN \"1000-01-01\" AND \"2000-01-01\" RIGHT JOIN `test3` t3 ON t3.time IN ('1000-01-01') CROSS JOIN `test4` t4 ON t4.time BETWEEN \"1000-01-01\" AND \"2000-01-01\" FULL JOIN `test5` t5 ON t5.time IS NULL AND t5.time >= \"1000-01-01\") qa WHERE qa.time IS NOT NULL");
+    expect($queryB->toSQL())->toBe("SELECT SUM(*) AS test FROM (SELECT column FROM `test` INNER JOIN `test1` t1 ON t1.time = test.time LEFT JOIN `test2` t2 ON t2.time = test.time AND t2.time BETWEEN \"1000-01-01\" AND \"2000-01-01\" RIGHT JOIN `test3` t3 ON t3.time IN ('1000-01-01') CROSS JOIN `test4` t4 ON t4.time BETWEEN \"1000-01-01\" AND \"2000-01-01\" FULL JOIN `test5` t5 ON t5.time IS NULL AND t5.time >= \"1000-01-01\") qa WHERE qa.time IS NOT NULL");
 });
 
-
-it("can generate groupby sqls", function () {
+it("can generate ordered and grouped sqls", function () {
     $sql = Builder::table("test")
         ->select(["column", "column2"])
         ->orderBy()
         ->orderBy([["column", "DESC"]])
         ->orderBy([["column2"]])
         ->orderBy("column3", "ASC")
+        ->groupBy(["column"])
         ->toSQL();
 
     expect($sql)->toBe("SELECT column, column2 FROM `test` ORDER BY column DESC, column2, column3 ASC");
+});
+
+it("can generate complex where", function () {
+    $sql = Builder::table("test")
+        ->select(["column", "column2"])
+        ->where(function (Where $query) {
+            $query->where("enabled", true)
+                ->whereIn("keyword", [], "or");
+        })->toSQL();
+
+    expect($sql)->toBe("SELECT column, column2 FROM `test` WHERE (enabled = 1)");
+
+    $sql = Builder::table("test")
+        ->select(["column", "column2"])
+        ->where(function (Where $query) {
+            $query->whereBetween("value", 1, 100);
+        })->toSQL();
+
+    expect($sql)->toBe("SELECT column, column2 FROM `test` WHERE (value BETWEEN 1 AND 100)");
 });

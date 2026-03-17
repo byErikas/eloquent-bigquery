@@ -115,7 +115,25 @@ trait BuildsSQLStatements
             $end = $end->format("Y-m-d H:i:s");
         }
 
-        return "{$column} BETWEEN \"{$start}\" AND \"{$end}\"";
+        $shouldEscapeStart = !str_contains($start, self::ACCESS_OPERATOR)
+            && !is_numeric($start)
+            && !is_null($start)
+            && !is_bool($start);
+
+        if ($shouldEscapeStart) {
+            $start = "\"{$start}\"";
+        }
+
+        $shouldEscapeEnd = !str_contains($end, self::ACCESS_OPERATOR)
+            && !is_numeric($end)
+            && !is_null($end)
+            && !is_bool($end);
+
+        if ($shouldEscapeEnd) {
+            $start = "\"{$end}\"";
+        }
+
+        return "{$column} BETWEEN {$start} AND {$end}";
     }
 
     private function buildJoin(string $table, string $alias, Closure $closure, string $type = "inner"): Join
