@@ -99,17 +99,17 @@ it("can remove empty wheres, and prefix where when needed", function () {
         ->select(["column", "column2"])
         ->whereIn("column", []);
 
-    expect($sql)->toBe("SELECT column, column2 FROM `test`");
+    expect($sql->toSQL())->toBe("SELECT column, column2 FROM `test`");
 
     $sql = Builder::table("test")
         ->select(["column", "column2"])
         ->whereIn("column", [1, 2]);
 
-    expect($sql)->toBe("SELECT column, column2 FROM `test` WHERE column IN (1, 2)");
+    expect($sql->toSQL())->toBe("SELECT column, column2 FROM `test` WHERE column IN (1, 2)");
 
     $sql = Builder::table("test")
         ->select(["column", "column2"])
         ->whereBetween("column", 1, 2);
 
-    expect($sql)->toBe("SELECT column, column2 FROM `test` WHERE column BETWEEN 1 AND 2");
+    expect($sql->toSQL())->toBe("SELECT column, column2 FROM `test` WHERE column BETWEEN 1 AND 2");
 });
