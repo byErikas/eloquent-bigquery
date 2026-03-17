@@ -187,19 +187,13 @@ trait BuildsSQLStatements
         return "GROUP BY " . implode(", ", $this->groupBy);
     }
 
-    private function buildOrder(): ?string
+    private function buildOrders(): ?string
     {
-        if (is_null($this->orderByColumn)) {
+        if (empty($this->orders)) {
             return null;
         }
 
-        $sql = "ORDER BY {$this->orderByColumn}";
-
-        if (!is_null($this->orderByDirection)) {
-            $sql .= " " . strtoupper($this->orderByDirection);
-        }
-
-        return $sql;
+        return "ORDER BY " . implode(", ", $this->orders);
     }
 
     private function buildLimit(): ?string

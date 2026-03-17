@@ -28,9 +28,7 @@ class Builder
 
     private array $groupBy = [];
 
-    private ?string $orderByColumn = null;
-
-    private ?string $orderByDirection = null;
+    private array $orders = [];
 
     public function __construct(null|Builder|string $table = null, ?string $alias = null)
     {
@@ -129,10 +127,37 @@ class Builder
         return $this;
     }
 
-    public function orderBy(?string $column = null, ?string $direction = null): self
+    public function orderBy(null|string|array $column = null, ?string $direction = null): self
     {
-        $this->orderByColumn = $column;
-        $this->orderByDirection = $direction;
+        if (is_null($column)) {
+            $this->orders = [];
+
+            return $this;
+        }
+
+        if (is_array($column)) {
+            foreach ($column as $orderArray) {
+                if (count($orderArray) == 2) {
+                    [$col, $dir] = $orderArray;
+
+                    $this->orders[] = "{$col} " . strtoupper($dir);
+
+                    continue;
+                }
+
+                $this->orders[] = array_first($orderArray);
+            }
+
+            return $this;
+        }
+
+        $sql = $column;
+
+        if ($direction) {
+            $sql = "{$column} " . strtoupper($direction);
+        }
+
+        $this->orders[] = $sql;
 
         return $this;
     }
@@ -180,7 +205,7 @@ class Builder
             $this->buildJoins(),
             $this->buildWheres(),
             $this->buildGroupBy(),
-            $this->buildOrder(),
+            $this->buildOrders(),
             $this->buildLimit(),
             $this->buildOffset(),
         ];

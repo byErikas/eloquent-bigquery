@@ -16,11 +16,10 @@ it("can generate basic select SQLs with dates, offset, limit and aliases", funct
         ->whereBetween("columnD", $date, $date)
         ->limit(10)
         ->offset(5)
-        ->groupBy(["column_alias"])
         ->orderBy("column_alias", "desc")
         ->toSQL();
 
-    expect($sql)->toBe("SELECT column AS column_alias FROM `test` table_alias WHERE columnA = \"value\" AND columnB IN (1, '1', 'yes') AND columnC BETWEEN \"1000-01-01\" AND \"2000-01-01\" AND columnD BETWEEN \"{$date->format("Y-m-d H:i:s")}\" AND \"{$date->format("Y-m-d H:i:s")}\" GROUP BY column_alias ORDER BY column_alias DESC LIMIT 10 OFFSET 5");
+    expect($sql)->toBe("SELECT column AS column_alias FROM `test` table_alias WHERE columnA = \"value\" AND columnB IN (1, '1', 'yes') AND columnC BETWEEN \"1000-01-01\" AND \"2000-01-01\" AND columnD BETWEEN \"{$date->format("Y-m-d H:i:s")}\" AND \"{$date->format("Y-m-d H:i:s")}\" ORDER BY column_alias DESC LIMIT 10 OFFSET 5");
 });
 
 it("can generate advanced wheres", function () {
@@ -59,4 +58,17 @@ it("can generate joins and subquery", function () {
         ->whereNotNull("qa.time");
 
     expect($queryB->toSQL())->toBe("SELECT SUM(*) AS test FROM (SELECT column FROM `test` LEFT JOIN `test2` t2 ON t2.time = test.time AND t2.time BETWEEN \"1000-01-01\" AND \"2000-01-01\" RIGHT JOIN `test3` t3 ON t3.time IN ('1000-01-01') CROSS JOIN `test4` t4 ON t4.time BETWEEN \"1000-01-01\" AND \"2000-01-01\" FULL JOIN `test5` t5 ON t5.time IS NULL AND t5.time >= \"1000-01-01\") qa WHERE qa.time IS NOT NULL");
+});
+
+
+it("can generate groupby sqls", function () {
+    $sql = Builder::table("test")
+        ->select(["column", "column2"])
+        ->orderBy()
+        ->orderBy([["column", "DESC"]])
+        ->orderBy([["column2"]])
+        ->orderBy("column3", "ASC")
+        ->toSQL();
+
+    expect($sql)->toBe("SELECT column, column2 FROM `test` ORDER BY column DESC, column2, column3 ASC");
 });
