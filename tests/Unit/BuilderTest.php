@@ -287,5 +287,5 @@ it("can generate subqueries", function () {
         ->select(["*"])
         ->where("sub.column", ">", 100);
 
-    expect($query->toSQL())->toBe("SELECT * FROM (SELECT column1 FROM test WHERE column2 = 1) sub WHERE sub.column > 100");
+    expect($query->toSQL())->toBe("SELECT * FROM (SELECT column1 FROM `test` WHERE column2 = 1) sub WHERE sub.column > 100");
 });
