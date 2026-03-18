@@ -52,6 +52,29 @@ it("can generate wheres", function () {
 
     expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE column1 = \"value\" AND column2 IS NULL AND column3 > 100 AND (column4 = 1 OR column5 != 1)");
 
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->where(function (Where $query) {
+            $query->whereIn("column1", [1, 2])
+                ->whereIn("column2", []);
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE (column1 IN (1, 2))");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->where(function (Where $query) {
+            $query->whereBetween("column1", 1, 100);
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE (column1 BETWEEN 1 AND 100)");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->whereNotNull("column1", "value");
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE column1 IS NOT NULL");
+
     expect(function () {
         return Builder::table("test")
             ->select(["*"])
