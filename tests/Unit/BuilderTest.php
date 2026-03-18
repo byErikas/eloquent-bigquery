@@ -175,6 +175,12 @@ it("can generate havings", function () {
 
     expect($query->toSQL())->toBe("SELECT * FROM `test` HAVING (column1 = \"value\" OR column2 > 100)");
 
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->having("column1", null);
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` HAVING column1 IS NULL");
+
     expect(function () {
         return Builder::table("test")
             ->select(["*"])
@@ -185,6 +191,12 @@ it("can generate havings", function () {
         "keyword" => "sumColumn3",
         "value" => "SUM(column3)"
     ]]);
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->havingAggregation("sumColumn3", null);
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` HAVING SUM(column3) IS NULL");
 
     $query = Builder::table("test")
         ->select(["*"])
