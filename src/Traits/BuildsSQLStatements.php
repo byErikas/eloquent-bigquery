@@ -38,11 +38,13 @@ trait BuildsSQLStatements
 
             $column($where);
 
+            $result = $where->toSQL();
+
             if ($boolean) {
-                return strtoupper($boolean) . " {$where->toSQL()}";
+                $result = strtoupper($boolean) . " {$result}";
             }
 
-            return $where->toSQL();
+            return $result;
         }
 
         if ($boolean) {
@@ -97,37 +99,20 @@ trait BuildsSQLStatements
 
     private function buildWhereBetween(string $column, int|string|Carbon $start, int|string|Carbon $end, ?string $boolean = "and"): string
     {
-        $shouldEscapeStart = !is_object($start)
-            && !str_contains($start, self::ACCESS_OPERATOR)
-            && !is_numeric($start)
-            && !is_null($start)
-            && !is_bool($start);
-
-        if ($shouldEscapeStart) {
-            $start = "\"{$start}\"";
-        }
-
-        $shouldEscapeEnd = !is_object($end)
-            && !str_contains($end, self::ACCESS_OPERATOR)
-            && !is_numeric($end)
-            && !is_null($end)
-            && !is_bool($end);
-
-        if ($shouldEscapeEnd) {
-            $end = "\"{$end}\"";
-        }
-
         if ($boolean) {
             $column = strtoupper($boolean) . " {$column}";
         }
 
         if (is_object($start) && $start instanceof Carbon) {
-            $start = "\"{$start->format("Y-m-d H:i:s")}\"";
+            $start = $start->format("Y-m-d H:i:s");
         }
 
         if (is_object($end) && $end instanceof Carbon) {
-            $end = "\"{$end->format("Y-m-d H:i:s")}\"";
+            $end = $end->format("Y-m-d H:i:s");
         }
+
+        $start = $this->escape($start);
+        $end = $this->escape($end);
 
         return "{$column} BETWEEN {$start} AND {$end}";
     }
@@ -163,14 +148,7 @@ trait BuildsSQLStatements
             $actualValue = $operator;
         }
 
-        $shouldEscapeValue = !str_contains($actualValue, self::ACCESS_OPERATOR)
-            && !is_numeric($actualValue)
-            && !is_null($actualValue)
-            && !is_bool($actualValue);
-
-        if ($shouldEscapeValue) {
-            $actualValue = "\"{$actualValue}\"";
-        }
+        $actualValue = $this->escape($actualValue);
 
         if (!$isOperator) {
             return match ($actualValue) {

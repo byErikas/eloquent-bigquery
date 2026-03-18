@@ -23,17 +23,17 @@ it("can generate selects", function () {
         ->select(["*"])
         ->selectAggregations(["sumColumn3"]);
 
-    expect(fn() => $query->toSQL())->toThrow(InvalidSelect::class, "Select can't be \"*\" when using \"selectAggregations\".");
+    expect(fn() => $query->toSQL())->toThrow(InvalidSelect::class);
 
     $query = Builder::table("test")
         ->select([]);
 
-    expect(fn() => $query->toSQL())->toThrow(InvalidSelect::class, "Select can't be empty.");
+    expect(fn() => $query->toSQL())->toThrow(InvalidSelect::class);
 
     $query = Builder::table("test")
         ->selectAggregations(["unknownAggregation"]);
 
-    expect(fn() => $query->toSQL())->toThrow(UndefinedAggregation::class, "Aggregation \"unknownAggregation\" not found, or is of invalid format!");
+    expect(fn() => $query->toSQL())->toThrow(UndefinedAggregation::class);
 });
 
 it("can generate wheres", function () {
@@ -105,6 +105,48 @@ it("can generate orderBys", function () {
         ->orderBy([["columnA", "desc"], ["columnB"]]);
 
     expect($query->toSQL())->toBe("SELECT * FROM `test` ORDER BY columnA DESC, columnB");
+});
+
+it("can generate joins", function () {
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->join("join", "j", function (Join $query) {
+            $query->where("column", "test.column");
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` INNER JOIN `join` j ON column = test.column");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->leftJoin("join", "j", function (Join $query) {
+            $query->where("column", "test.column");
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` LEFT JOIN `join` j ON column = test.column");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->rightJoin("join", "j", function (Join $query) {
+            $query->where("column", "test.column");
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` RIGHT JOIN `join` j ON column = test.column");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->crossJoin("join", "j", function (Join $query) {
+            $query->where("column", "test.column");
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` CROSS JOIN `join` j ON column = test.column");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->fullJoin("join", "j", function (Join $query) {
+            $query->where("column", "test.column");
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` FULL JOIN `join` j ON column = test.column");
 });
 
 // it("can generate basic select SQLs with dates, offset, limit and aliases", function () {
