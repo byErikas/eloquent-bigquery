@@ -5,6 +5,7 @@ namespace ByErikas\EloquentBigQuery\Traits;
 use ByErikas\EloquentBigQuery\Exceptions\InvalidSelect;
 use ByErikas\EloquentBigQuery\Exceptions\UndefinedAggregation;
 use ByErikas\EloquentBigQuery\Facades\AggregationsRepository;
+use ByErikas\EloquentBigQuery\Having;
 use ByErikas\EloquentBigQuery\Join;
 use ByErikas\EloquentBigQuery\Where;
 use Closure;
@@ -124,6 +125,46 @@ trait BuildsSQLStatements
         $closure($join);
 
         return $join;
+    }
+
+    private function buildHaving(string|Closure $column, mixed $operator = null, mixed $value = null, ?string $boolean = "and"): string
+    {
+        if ($column instanceof Closure) {
+            $where = new Having();
+
+            $column($where);
+
+            $result = $where->toSQL();
+
+            if ($boolean) {
+                $result = strtoupper($boolean) . " {$result}";
+            }
+
+            return $result;
+        }
+
+        if ($boolean) {
+            $column = strtoupper($boolean) . " {$column}";
+        }
+
+        $isOperator = in_array(strtoupper($operator), self::COMPARISON_OPERATORS);
+
+        $actualValue = $value;
+
+        if (!$isOperator) {
+            $actualValue = $operator;
+        }
+
+        $actualValue = $this->escape($actualValue);
+
+        if (!$isOperator) {
+            return match ($actualValue) {
+                null => "{$column} IS NULL",
+                default => "{$column} = {$actualValue}"
+            };
+        }
+
+        return "{$column} {$operator} {$actualValue}";
     }
 
     private function buildHavingAggregation(string $aggregation, mixed $operator = null, mixed $value = null, ?string $boolean = "and"): string

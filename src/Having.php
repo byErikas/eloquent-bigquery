@@ -17,7 +17,7 @@ class Having
             $boolean = "having";
         }
 
-        $this->havings[] = $this->buildWhere($column, $operator, $value, $boolean);
+        $this->havings[] = $this->buildHaving($column, $operator, $value, $boolean);
 
         return $this;
     }
