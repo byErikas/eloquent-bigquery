@@ -277,3 +277,15 @@ it("can generate havings", function () {
             ->havingAggregation("unknownAggregation", 100)->toSQL();
     })->toThrow(UndefinedAggregation::class);
 });
+
+it("can generate subqueries", function () {
+    $subquery = Builder::table("test")
+        ->select(["column1"])
+        ->where("column2", true);
+
+    $query = Builder::table($subquery, "sub")
+        ->select(["*"])
+        ->where("sub.column", ">", 100);
+
+    expect($query->toSQL())->toBe("SELECT * FROM (SELECT column1 FROM test WHERE column2 = 1) sub WHERE sub.column > 100");
+});
