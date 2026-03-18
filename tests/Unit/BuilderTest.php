@@ -183,7 +183,8 @@ it("can generate joins", function () {
     expect(function () {
         return Builder::table("test")
             ->select(["*"])
-            ->join("join", "j", function (Join $query) {});
+            ->join("join", "j", function (Join $query) {})
+            ->toSQL();
     })->toThrow(WheresCantBeEmpty::class);
 
     $query = Builder::table("test")
