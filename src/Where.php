@@ -38,7 +38,7 @@ class Where
         return $this;
     }
 
-    public function whereBetween(string $column, string|Carbon $start, string|Carbon $end, string $boolean = "and"): self
+    public function whereBetween(string $column, int|string|Carbon $start, int|string|Carbon $end, string $boolean = "and"): self
     {
         if (!count($this->wheres)) {
             $boolean = "";
