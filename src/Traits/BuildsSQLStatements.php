@@ -12,8 +12,9 @@ use Illuminate\Support\Carbon;
 
 trait BuildsSQLStatements
 {
+    use EscapesVariables;
+
     private const array COMPARISON_OPERATORS = ["=", "!=", ">", ">=", "<", "<=", "<>", "LIKE", "NOT LIKE"];
-    private const string ACCESS_OPERATOR = ".";
 
     private function buildFrom(): string
     {
@@ -56,14 +57,7 @@ trait BuildsSQLStatements
             $actualValue = $operator;
         }
 
-        $shouldEscapeValue = !str_contains($actualValue, self::ACCESS_OPERATOR)
-            && !is_numeric($actualValue)
-            && !is_null($actualValue)
-            && !is_bool($actualValue);
-
-        if ($shouldEscapeValue) {
-            $actualValue = "\"{$actualValue}\"";
-        }
+        $actualValue = $this->escape($actualValue);
 
         if (!$isOperator) {
             return match ($actualValue) {
@@ -101,7 +95,7 @@ trait BuildsSQLStatements
         return "{$column} IN (" . implode(", ", $values) . ")";
     }
 
-    private function buildWhereBetween(string $column, string|Carbon $start, string|Carbon $end, ?string $boolean = "and"): string
+    private function buildWhereBetween(string $column, int|string|Carbon $start, int|string|Carbon $end, ?string $boolean = "and"): string
     {
         $shouldEscapeStart = !is_object($start)
             && !str_contains($start, self::ACCESS_OPERATOR)

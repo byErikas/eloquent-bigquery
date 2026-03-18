@@ -19,6 +19,29 @@ it("can generate wheres", function () {
     expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE column1 = \"value\" AND column2 IS NULL AND column3 > 100 AND (column4 = 1 OR column5 != 1)");
 });
 
+it("can generate wheresIns", function () {
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->whereIn("column1", [])
+        ->whereIn("column2", ["value1", "value2"])
+        ->whereIn("column3", [1, 2]);
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE column2 IN ('value1', 'value2') AND column3 IN (1, 2)");
+});
+
+it("can generate whereBetweens", function () {
+    $carbon = now();
+    $carbonFormatted = $carbon->format("Y-m-d H:i:s");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->whereBetween("column1", $carbon, $carbon)
+        ->whereBetween("column2", 1, 100, "or")
+        ->whereBetween("column3", "1000-01-01", "2000-01-01");
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE column1 BETWEEN \"{$carbonFormatted}\" AND \"{$carbonFormatted}\" OR column2 BETWEEN 1 AND 100 AND column3 BETWEEN \"1000-01-01\" AND \"2000-01-01\"");
+});
+
 // it("can generate basic select SQLs with dates, offset, limit and aliases", function () {
 //     $date = now();
 
