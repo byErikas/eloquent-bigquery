@@ -12,7 +12,7 @@ use Illuminate\Support\Carbon;
 
 trait BuildsSQLStatements
 {
-    use EscapesVariables;
+    use EscapesProperties;
 
     private const array COMPARISON_OPERATORS = ["=", "!=", ">", ">=", "<", "<=", "<>", "LIKE", "NOT LIKE"];
 

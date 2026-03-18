@@ -2,7 +2,7 @@
 
 namespace ByErikas\EloquentBigQuery\Traits;
 
-trait EscapesVariables
+trait EscapesProperties
 {
     private const string ACCESS_OPERATOR = ".";
 
