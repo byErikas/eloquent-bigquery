@@ -3,8 +3,8 @@
 namespace ByErikas\EloquentBigQuery\Traits;
 
 use ByErikas\EloquentBigQuery\Exceptions\InvalidSelect;
-use ByErikas\EloquentBigQuery\Exceptions\UndefinedMetric;
-use ByErikas\EloquentBigQuery\Facades\MetricsRepository;
+use ByErikas\EloquentBigQuery\Exceptions\UndefinedAggregation;
+use ByErikas\EloquentBigQuery\Facades\AggregationsRepository;
 use ByErikas\EloquentBigQuery\Join;
 use ByErikas\EloquentBigQuery\Where;
 use Closure;
@@ -147,18 +147,18 @@ trait BuildsSQLStatements
         return $join;
     }
 
-    private function buildHavingMetric(string $metric, mixed $operator = null, mixed $value = null, ?string $boolean = "and"): string
+    private function buildHavingAggregation(string $aggregation, mixed $operator = null, mixed $value = null, ?string $boolean = "and"): string
     {
-        $metricData = MetricsRepository::find($metric);
+        $aggregationData = AggregationsRepository::find($aggregation);
 
-        if (!$metricData || !isset($metricData["value"])) {
-            throw new UndefinedMetric("Metric \"{$metric}\" not found, or is of invalid format!");
+        if (!$aggregationData || !isset($aggregationData["value"])) {
+            throw new UndefinedAggregation("Aggregation \"{$aggregation}\" not found, or is of invalid format!");
         }
 
-        $column = $metric["value"];
+        $column = $aggregation["value"];
 
         if ($boolean) {
-            $column = strtoupper($boolean) . " {$metric["value"]}";
+            $column = strtoupper($boolean) . " {$aggregation["value"]}";
         }
 
         $isOperator = in_array(strtoupper($operator), self::COMPARISON_OPERATORS);
@@ -192,16 +192,16 @@ trait BuildsSQLStatements
     {
         $select = $this->select;
 
-        if (count($this->selectMetrics) > 0) {
+        if (count($this->selectAggregations) > 0) {
             if ($select == ["*"]) {
-                throw new InvalidSelect("Select can't be \"*\" when using \"selectMetrics\".");
+                throw new InvalidSelect("Select can't be \"*\" when using \"selectAggregations\".");
             }
 
-            foreach ($this->selectMetrics as $metricKeyword) {
-                $metric = MetricsRepository::find($metricKeyword);
+            foreach ($this->selectAggregations as $metricKeyword) {
+                $metric = AggregationsRepository::find($metricKeyword);
 
                 if (!$metric || !isset($metric["value"])) {
-                    throw new UndefinedMetric("Metric \"{$metricKeyword}\" not found, or is of invalid format!");
+                    throw new UndefinedAggregation("Metric \"{$metricKeyword}\" not found, or is of invalid format!");
                 }
 
                 $select[] = "{$metric["value"]} AS {$metricKeyword}";

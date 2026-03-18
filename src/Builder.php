@@ -16,7 +16,7 @@ class Builder
 
     private array $select = [];
 
-    private array $selectMetrics = [];
+    private array $selectAggregations = [];
 
     private array $wheres = [];
 
@@ -53,9 +53,9 @@ class Builder
         return $this;
     }
 
-    public function selectMetrics(array $metrics = []): self
+    public function selectAggregations(array $aggregations = []): self
     {
-        $this->selectMetrics = $metrics;
+        $this->selectAggregations = $aggregations;
 
         return $this;
     }

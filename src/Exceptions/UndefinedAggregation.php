@@ -4,4 +4,4 @@ namespace ByErikas\EloquentBigQuery\Exceptions;
 
 use Exception;
 
-class UndefinedMetric extends Exception {}
+class UndefinedAggregation extends Exception {}
