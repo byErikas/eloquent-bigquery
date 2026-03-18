@@ -25,6 +25,11 @@ class Join
         $this->type = $type;
     }
 
+    public function on(string $column, mixed $operator, mixed $value = null, string $boolean = "on"): self
+    {
+        return $this->where($column, $operator, $value, $boolean);
+    }
+
     public function where(string $column, mixed $operator, mixed $value = null, string $boolean = "and"): self
     {
         if (!count($this->wheres)) {

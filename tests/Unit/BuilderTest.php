@@ -1,9 +1,12 @@
 <?php
 
 use ByErikas\EloquentBigQuery\Builder;
+use ByErikas\EloquentBigQuery\Exceptions\HavingsCantBeEmpty;
 use ByErikas\EloquentBigQuery\Exceptions\InvalidSelect;
 use ByErikas\EloquentBigQuery\Exceptions\UndefinedAggregation;
+use ByErikas\EloquentBigQuery\Exceptions\WheresCantBeEmpty;
 use ByErikas\EloquentBigQuery\Facades\AggregationsRepository;
+use ByErikas\EloquentBigQuery\Having;
 use ByErikas\EloquentBigQuery\Join;
 use ByErikas\EloquentBigQuery\Where;
 
@@ -48,6 +51,12 @@ it("can generate wheres", function () {
         });
 
     expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE column1 = \"value\" AND column2 IS NULL AND column3 > 100 AND (column4 = 1 OR column5 != 1)");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->where(function (Where $query) {});
+
+    expect(fn() => $query->toSQL())->toThrow(WheresCantBeEmpty::class);
 });
 
 it("can generate wheresIns", function () {
@@ -111,7 +120,7 @@ it("can generate joins", function () {
     $query = Builder::table("test")
         ->select(["*"])
         ->join("join", "j", function (Join $query) {
-            $query->where("column", "test.column");
+            $query->on("column", "test.column");
         });
 
     expect($query->toSQL())->toBe("SELECT * FROM `test` INNER JOIN `join` j ON j.column = test.column");
@@ -147,6 +156,67 @@ it("can generate joins", function () {
         });
 
     expect($query->toSQL())->toBe("SELECT * FROM `test` FULL JOIN `join` j ON j.column = test.column");
+});
+
+it("can generate havings", function () {
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->having("column1", "value")
+        ->having("column2", ">", 100);
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` HAVING column1 = \"value\" AND column2 > 100");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->having(function (Having $query) {
+            $query->having("column1", "value")
+                ->having("column2", ">", 100, "or");
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` HAVING (column1 = \"value\" OR column2 > 100)");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->having(function (Having $query) {});
+
+    expect(fn() => $query->toSQL())->toThrow(HavingsCantBeEmpty::class);
+
+    AggregationsRepository::from([[
+        "keyword" => "sumColumn3",
+        "value" => "SUM(column3)"
+    ]]);
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->havingAggregation("sumColumn3", 100)
+        ->havingAggregation("sumColumn3", ">", 10);
+
+    expect($query->toSQL())->toBe("SELECT * from `test` HAVING SUM(column3) = 100 AND SUM(column3) > 10");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->having(function (Having $query) {
+            $query->having("column1", 100)
+                ->having("column2", ">", 10)
+                ->havingAggregation("sumColumn3", 100, boolean: "or");
+        });
+
+    expect($query->toSQL())->toBe("SELECT * from `test` HAVING (column1 = 100 AND column2 > 10 OR SUM(column3) = 100)");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->having(function (Having $query) {
+            $query->havingAggregation("sumColumn3", 100)
+                ->having("column1", "!=", 10, "or");
+        });
+
+    expect($query->toSQL())->toBe("SELECT * from `test` HAVING (SUM(column3) = 100 OR column1 != 10)");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->havingAggregation("unknownAggregation", 1000);
+
+    expect(fn() => $query->toSQL())->toThrow(UndefinedAggregation::class);
 });
 
 // it("can generate basic select SQLs with dates, offset, limit and aliases", function () {

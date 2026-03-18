@@ -210,13 +210,13 @@ class Builder
         return $this;
     }
 
-    public function havingMetric(string $metric, mixed $operator = null, mixed $value = null, string $boolean = "and"): self
+    public function havingAggregation(string $aggregation, mixed $operator = null, mixed $value = null, string $boolean = "and"): self
     {
         if (!count($this->havings)) {
             $boolean = "having";
         }
 
-        $this->havings[] = $this->buildHavingMetric($metric, $operator, $value, $boolean);
+        $this->havings[] = $this->buildHavingAggregation($aggregation, $operator, $value, $boolean);
 
         return $this;
     }
