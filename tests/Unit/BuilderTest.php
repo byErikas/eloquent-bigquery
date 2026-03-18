@@ -7,6 +7,7 @@ use ByErikas\EloquentBigQuery\Where;
 
 it("can generate wheres", function () {
     $query = Builder::table("test")
+        ->select(["*"])
         ->where("column1", "value")
         ->where("column2", null)
         ->where("column3", ">", 100)
