@@ -191,7 +191,7 @@ it("can generate havings", function () {
         ->havingAggregation("sumColumn3", 100)
         ->havingAggregation("sumColumn3", ">", 10);
 
-    expect($query->toSQL())->toBe("SELECT * from `test` HAVING SUM(column3) = 100 AND SUM(column3) > 10");
+    expect($query->toSQL())->toBe("SELECT * FROM `test` HAVING SUM(column3) = 100 AND SUM(column3) > 10");
 
     $query = Builder::table("test")
         ->select(["*"])
@@ -201,7 +201,7 @@ it("can generate havings", function () {
                 ->havingAggregation("sumColumn3", 100, boolean: "or");
         });
 
-    expect($query->toSQL())->toBe("SELECT * from `test` HAVING (column1 = 100 AND column2 > 10 OR SUM(column3) = 100)");
+    expect($query->toSQL())->toBe("SELECT * FROM `test` HAVING (column1 = 100 AND column2 > 10 OR SUM(column3) = 100)");
 
     $query = Builder::table("test")
         ->select(["*"])
@@ -210,7 +210,7 @@ it("can generate havings", function () {
                 ->having("column1", "!=", 10, "or");
         });
 
-    expect($query->toSQL())->toBe("SELECT * from `test` HAVING (SUM(column3) = 100 OR column1 != 10)");
+    expect($query->toSQL())->toBe("SELECT * FROM `test` HAVING (SUM(column3) = 100 OR column1 != 10)");
 
     $query = Builder::table("test")
         ->select(["*"])
