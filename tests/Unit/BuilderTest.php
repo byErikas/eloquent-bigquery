@@ -114,7 +114,7 @@ it("can generate joins", function () {
             $query->where("column", "test.column");
         });
 
-    expect($query->toSQL())->toBe("SELECT * FROM `test` INNER JOIN `join` j ON column = test.column");
+    expect($query->toSQL())->toBe("SELECT * FROM `test` INNER JOIN `join` j ON j.column = test.column");
 
     $query = Builder::table("test")
         ->select(["*"])
@@ -122,7 +122,7 @@ it("can generate joins", function () {
             $query->where("column", "test.column");
         });
 
-    expect($query->toSQL())->toBe("SELECT * FROM `test` LEFT JOIN `join` j ON column = test.column");
+    expect($query->toSQL())->toBe("SELECT * FROM `test` LEFT JOIN `join` j ON j.column = test.column");
 
     $query = Builder::table("test")
         ->select(["*"])
@@ -130,7 +130,7 @@ it("can generate joins", function () {
             $query->where("column", "test.column");
         });
 
-    expect($query->toSQL())->toBe("SELECT * FROM `test` RIGHT JOIN `join` j ON column = test.column");
+    expect($query->toSQL())->toBe("SELECT * FROM `test` RIGHT JOIN `join` j ON j.column = test.column");
 
     $query = Builder::table("test")
         ->select(["*"])
@@ -138,7 +138,7 @@ it("can generate joins", function () {
             $query->where("column", "test.column");
         });
 
-    expect($query->toSQL())->toBe("SELECT * FROM `test` CROSS JOIN `join` j ON column = test.column");
+    expect($query->toSQL())->toBe("SELECT * FROM `test` CROSS JOIN `join` j ON j.column = test.column");
 
     $query = Builder::table("test")
         ->select(["*"])
@@ -146,7 +146,7 @@ it("can generate joins", function () {
             $query->where("column", "test.column");
         });
 
-    expect($query->toSQL())->toBe("SELECT * FROM `test` FULL JOIN `join` j ON column = test.column");
+    expect($query->toSQL())->toBe("SELECT * FROM `test` FULL JOIN `join` j ON j.column = test.column");
 });
 
 // it("can generate basic select SQLs with dates, offset, limit and aliases", function () {
