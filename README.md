@@ -42,9 +42,9 @@ $result = QueryService::query($query)->execute();
 [$resultsA, $resultsB] = QueryService::query([$queryA, $queryB])->execute(); //multiple queries are supported
 ```
 
-Selecting predefined columns or aggregations on queries can be done using `selectMetrics` method:
+Selecting predefined columns or aggregations on queries can be done using `selectAggregations` method:
 ```php
-Builder::table("test")->selectMetrics(["metric-1"]);
+Builder::table("test")->selectAggregations(["metric-1"]);
 ```
 
 Joins and more complex where statements are supported by using various `join` methods, and by passing a function to the first parameter of `where`:
@@ -88,18 +88,18 @@ public function boot(): void {
 ```
 As well as register any custom / complex select metrics or aggregations that you may be storing elsewhere:
 ```php
-use ByErikas\EloquentBigQuery\Facades\MetricsRepository;
+use ByErikas\EloquentBigQuery\Facades\AggregationsRepository;
 
 public function boot(): void {
 
   //...
 
-  MetricsRepository::from([["keyword" => "metric-1", "value" => "ROUND(..."]]);
+  AggregationsRepository::from([["keyword" => "metric-1", "value" => "ROUND(..."]]);
 
   //...
 }
 ```
-the `MetricsRepository::from()` method accepts array of arrays or a Collection of arrays, and must have the following structure:
+the `AggregationsRepository::from()` method accepts array of arrays or a Collection of arrays, and must have the following structure:
 ```php
 $metrics = [
   [
