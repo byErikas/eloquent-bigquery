@@ -195,7 +195,7 @@ trait BuildsSQLStatements
                 $metric = AggregationsRepository::find($metricKeyword);
 
                 if (!$metric || !isset($metric["value"])) {
-                    throw new UndefinedAggregation("Metric \"{$metricKeyword}\" not found, or is of invalid format!");
+                    throw new UndefinedAggregation("Aggregation \"{$metricKeyword}\" not found, or is of invalid format!");
                 }
 
                 $select[] = "{$metric["value"]} AS {$metricKeyword}";
