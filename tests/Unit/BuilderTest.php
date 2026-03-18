@@ -214,7 +214,7 @@ it("can generate havings", function () {
 
     $query = Builder::table("test")
         ->select(["*"])
-        ->havingAggregation("unknownAggregation", 1000);
+        ->havingAggregation("unknownAggregation", 100);
 
     expect(fn() => $query->toSQL())->toThrow(UndefinedAggregation::class);
 });

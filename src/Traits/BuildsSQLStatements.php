@@ -175,10 +175,10 @@ trait BuildsSQLStatements
             throw new UndefinedAggregation("Aggregation \"{$aggregation}\" not found, or is of invalid format!");
         }
 
-        $column = $aggregation["value"];
+        $column = $aggregationData["value"];
 
         if ($boolean) {
-            $column = strtoupper($boolean) . " {$aggregation["value"]}";
+            $column = strtoupper($boolean) . " {$aggregationData["value"]}";
         }
 
         $isOperator = in_array(strtoupper($operator), self::COMPARISON_OPERATORS);
