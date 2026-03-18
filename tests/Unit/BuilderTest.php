@@ -179,6 +179,29 @@ it("can generate joins", function () {
         });
 
     expect($query->toSQL())->toBe("SELECT * FROM `test` FULL JOIN `join` j ON j.column = test.column");
+
+    expect(function () {
+        return Builder::table("test")
+            ->select(["*"])
+            ->join("join", "j", function (Join $query) {});
+    })->toThrow(WheresCantBeEmpty::class);
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->join("join", "j", function (Join $query) {
+            $query->whereIn("column", [])
+                ->whereIn("column", [1, 2]);
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` INNER JOIN `join` j ON j.column IN (1, 2)");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->join("join", "j", function (Join $query) {
+            $query->whereBetween("column", 1, 100);
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` INNER JOIN `join` j ON j.column BETWEEN 1 AND 100");
 });
 
 it("can generate havings", function () {
