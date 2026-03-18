@@ -17,7 +17,7 @@ it("can generate selects", function () {
         ->select(["column1 AS alias", "column2"])
         ->selectAggregations(["sumColumn3"]);
 
-    expect($query->toSQL())->toBe("SELECT column1 AS alias, column2, SUM(column3) as sumColumn3 FROM `test`");
+    expect($query->toSQL())->toBe("SELECT column1 AS alias, column2, SUM(column3) AS sumColumn3 FROM `test`");
 
     $query = Builder::table("test")
         ->select(["*"])
