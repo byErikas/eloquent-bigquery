@@ -1,9 +1,40 @@
 <?php
 
 use ByErikas\EloquentBigQuery\Builder;
-use ByErikas\EloquentBigQuery\Facades\MetricsRepository;
+use ByErikas\EloquentBigQuery\Exceptions\InvalidSelect;
+use ByErikas\EloquentBigQuery\Exceptions\UndefinedAggregation;
+use ByErikas\EloquentBigQuery\Facades\AggregationsRepository;
 use ByErikas\EloquentBigQuery\Join;
 use ByErikas\EloquentBigQuery\Where;
+
+it("can generate selects", function () {
+    AggregationsRepository::from([[
+        "keyword" => "sumColumn3",
+        "value" => "SUM(column3)"
+    ]]);
+
+    $query = Builder::table("test")
+        ->select(["column1 AS alias", "column2"])
+        ->selectAggregations(["sumColumn3"]);
+
+    expect($query->toSQL())->toBe("SELECT column1 AS alias, column2, SUM(column3) as sumColumn3 FROM `test`");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->selectAggregations(["sumColumn3"]);
+
+    expect($query->toSQL())->toThrow(InvalidSelect::class);
+
+    $query = Builder::table("test")
+        ->select([]);
+
+    expect($query->toSQL())->toThrow(InvalidSelect::class);
+
+    $query = Builder::table("test")
+        ->selectAggregations(["unknownAggregation"]);
+
+    expect($query->toSQL())->toThrow(UndefinedAggregation::class);
+});
 
 it("can generate wheres", function () {
     $query = Builder::table("test")
@@ -40,6 +71,40 @@ it("can generate whereBetweens", function () {
         ->whereBetween("column3", "1000-01-01", "2000-01-01");
 
     expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE column1 BETWEEN \"{$carbonFormatted}\" AND \"{$carbonFormatted}\" OR column2 BETWEEN 1 AND 100 AND column3 BETWEEN \"1000-01-01\" AND \"2000-01-01\"");
+});
+
+it("can generate limits", function () {
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->limit(100);
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` LIMIT 100");
+});
+
+it("can generate offsets", function () {
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->offset(100);
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` OFFSET 100");
+});
+
+it("can generate groupBys", function () {
+    $query = Builder::table("test")
+        ->select(["columnA", "columnB", "columnC"])
+        ->groupBy(["columnA", "columnB", "columnC"]);
+
+    expect($query->toSQL())->toBe("SELECT columnA, columnB, columnC FROM `test` GROUP BY columnA, columnB, columnC");
+});
+
+it("can generate orderBys", function () {
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->orderBy("column", "desc")
+        ->orderBy()
+        ->orderBy([["columnA", "desc"], ["columnB"]]);
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` ORDER BY columnA DESC columnB");
 });
 
 // it("can generate basic select SQLs with dates, offset, limit and aliases", function () {
