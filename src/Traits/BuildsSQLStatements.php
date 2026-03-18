@@ -3,8 +3,9 @@
 namespace ByErikas\EloquentBigQuery\Traits;
 
 use ByErikas\EloquentBigQuery\Exceptions\InvalidSelect;
-use ByErikas\EloquentBigQuery\Exceptions\UndefinedMetric;
-use ByErikas\EloquentBigQuery\Facades\MetricsRepository;
+use ByErikas\EloquentBigQuery\Exceptions\UndefinedAggregation;
+use ByErikas\EloquentBigQuery\Facades\AggregationsRepository;
+use ByErikas\EloquentBigQuery\Having;
 use ByErikas\EloquentBigQuery\Join;
 use ByErikas\EloquentBigQuery\Where;
 use Closure;
@@ -12,8 +13,9 @@ use Illuminate\Support\Carbon;
 
 trait BuildsSQLStatements
 {
+    use EscapesProperties;
+
     private const array COMPARISON_OPERATORS = ["=", "!=", ">", ">=", "<", "<=", "<>", "LIKE", "NOT LIKE"];
-    private const string ACCESS_OPERATOR = ".";
 
     private function buildFrom(): string
     {
@@ -37,11 +39,13 @@ trait BuildsSQLStatements
 
             $column($where);
 
+            $result = $where->toSQL();
+
             if ($boolean) {
-                return strtoupper($boolean) . " {$where->toSQL()}";
+                $result = strtoupper($boolean) . " {$result}";
             }
 
-            return $where->toSQL();
+            return $result;
         }
 
         if ($boolean) {
@@ -56,14 +60,7 @@ trait BuildsSQLStatements
             $actualValue = $operator;
         }
 
-        $shouldEscapeValue = !str_contains($actualValue, self::ACCESS_OPERATOR)
-            && !is_numeric($actualValue)
-            && !is_null($actualValue)
-            && !is_bool($actualValue);
-
-        if ($shouldEscapeValue) {
-            $actualValue = "\"{$actualValue}\"";
-        }
+        $actualValue = $this->escape($actualValue);
 
         if (!$isOperator) {
             return match ($actualValue) {
@@ -101,39 +98,22 @@ trait BuildsSQLStatements
         return "{$column} IN (" . implode(", ", $values) . ")";
     }
 
-    private function buildWhereBetween(string $column, string|Carbon $start, string|Carbon $end, ?string $boolean = "and"): string
+    private function buildWhereBetween(string $column, int|string|Carbon $start, int|string|Carbon $end, ?string $boolean = "and"): string
     {
-        $shouldEscapeStart = !is_object($start)
-            && !str_contains($start, self::ACCESS_OPERATOR)
-            && !is_numeric($start)
-            && !is_null($start)
-            && !is_bool($start);
-
-        if ($shouldEscapeStart) {
-            $start = "\"{$start}\"";
-        }
-
-        $shouldEscapeEnd = !is_object($end)
-            && !str_contains($end, self::ACCESS_OPERATOR)
-            && !is_numeric($end)
-            && !is_null($end)
-            && !is_bool($end);
-
-        if ($shouldEscapeEnd) {
-            $end = "\"{$end}\"";
-        }
-
         if ($boolean) {
             $column = strtoupper($boolean) . " {$column}";
         }
 
         if (is_object($start) && $start instanceof Carbon) {
-            $start = "\"{$start->format("Y-m-d H:i:s")}\"";
+            $start = $start->format("Y-m-d H:i:s");
         }
 
         if (is_object($end) && $end instanceof Carbon) {
-            $end = "\"{$end->format("Y-m-d H:i:s")}\"";
+            $end = $end->format("Y-m-d H:i:s");
         }
+
+        $start = $this->escape($start);
+        $end = $this->escape($end);
 
         return "{$column} BETWEEN {$start} AND {$end}";
     }
@@ -147,20 +127,94 @@ trait BuildsSQLStatements
         return $join;
     }
 
+    private function buildHaving(string|Closure $column, mixed $operator = null, mixed $value = null, ?string $boolean = "and"): string
+    {
+        if ($column instanceof Closure) {
+            $having = new Having();
+
+            $column($having);
+
+            $result = $having->toSQL();
+
+            if ($boolean) {
+                $result = strtoupper($boolean) . " {$result}";
+            }
+
+            return $result;
+        }
+
+        if ($boolean) {
+            $column = strtoupper($boolean) . " {$column}";
+        }
+
+        $isOperator = in_array(strtoupper($operator), self::COMPARISON_OPERATORS);
+
+        $actualValue = $value;
+
+        if (!$isOperator) {
+            $actualValue = $operator;
+        }
+
+        $actualValue = $this->escape($actualValue);
+
+        if (!$isOperator) {
+            return match ($actualValue) {
+                null => "{$column} IS NULL",
+                default => "{$column} = {$actualValue}"
+            };
+        }
+
+        return "{$column} {$operator} {$actualValue}";
+    }
+
+    private function buildHavingAggregation(string $aggregation, mixed $operator = null, mixed $value = null, ?string $boolean = "and"): string
+    {
+        $aggregationData = AggregationsRepository::find($aggregation);
+
+        if (!$aggregationData || !isset($aggregationData["value"])) {
+            throw new UndefinedAggregation("Aggregation \"{$aggregation}\" not found, or is of invalid format!");
+        }
+
+        $column = $aggregationData["value"];
+
+        if ($boolean) {
+            $column = strtoupper($boolean) . " {$aggregationData["value"]}";
+        }
+
+        $isOperator = in_array(strtoupper($operator), self::COMPARISON_OPERATORS);
+
+        $actualValue = $value;
+
+        if (!$isOperator) {
+            $actualValue = $operator;
+        }
+
+        $actualValue = $this->escape($actualValue);
+
+        if (!$isOperator) {
+            return match ($actualValue) {
+                null => "{$column} IS NULL",
+                default => "{$column} = {$actualValue}"
+            };
+        }
+
+        return "{$column} {$operator} {$actualValue}";
+    }
+
     private function buildSelect(): string
     {
         $select = $this->select;
 
-        if (count($this->selectMetrics) > 0) {
+        if (count($this->selectAggregations) > 0) {
             if ($select == ["*"]) {
-                throw new InvalidSelect("Select can't be \"*\" when using \"selectMetrics\".");
+                throw new InvalidSelect("Select can't be \"*\" when using \"selectAggregations\".");
             }
 
-            foreach ($this->selectMetrics as $metricKeyword) {
-                $metric = MetricsRepository::find($metricKeyword);
+            foreach ($this->selectAggregations as $metricKeyword) {
+                $metric = AggregationsRepository::find($metricKeyword);
 
                 if (!$metric || !isset($metric["value"])) {
-                    throw new UndefinedMetric("Metric \"{$metricKeyword}\" not found, or is of invalid format!");
+                    throw new UndefinedAggregation("Aggregation \"{$metricKeyword}\" not found, or is of invalid format!");
                 }
 
                 $select[] = "{$metric["value"]} AS {$metricKeyword}";
@@ -205,6 +259,15 @@ trait BuildsSQLStatements
         }
 
         return "GROUP BY " . implode(", ", $this->groupBy);
+    }
+
+    private function buildHavings(): ?string
+    {
+        if (empty($this->havings)) {
+            return null;
+        }
+
+        return implode(" ", $this->havings);
     }
 
     private function buildOrders(): ?string

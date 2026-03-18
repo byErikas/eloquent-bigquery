@@ -2,17 +2,17 @@
 
 namespace ByErikas\EloquentBigQuery\Facades;
 
-use ByErikas\EloquentBigQuery\MetricsRepository as BigQueryMetricsRepository;
+use ByErikas\EloquentBigQuery\AggregationsRepository as BigQueryAggregationsRepository;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static \ByErikas\EloquentBigQuery\QueryService from(array|\Illuminate\Support\Collection $metrics)
+ * @method static void from(array|\Illuminate\Support\Collection $metrics)
  * @method static array all()
  * @method static ?array find($string $keyword)
  *
- * @see \ByErikas\EloquentBigQuery\MetricsRepository
+ * @see \ByErikas\EloquentBigQuery\AggregationsRepository
  */
-class MetricsRepository extends Facade
+class AggregationsRepository extends Facade
 {
     /**
      * Get the registered name of the component.
@@ -21,6 +21,6 @@ class MetricsRepository extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return BigQueryMetricsRepository::class;
+        return BigQueryAggregationsRepository::class;
     }
 }

@@ -16,7 +16,7 @@ class Builder
 
     private array $select = [];
 
-    private array $selectMetrics = [];
+    private array $selectAggregations = [];
 
     private array $wheres = [];
 
@@ -29,6 +29,8 @@ class Builder
     private array $groupBy = [];
 
     private array $orders = [];
+
+    private array $havings = [];
 
     public function __construct(null|Builder|string $table = null, ?string $alias = null)
     {
@@ -51,9 +53,9 @@ class Builder
         return $this;
     }
 
-    public function selectMetrics(array $metrics = []): self
+    public function selectAggregations(array $aggregations = []): self
     {
-        $this->selectMetrics = $metrics;
+        $this->selectAggregations = $aggregations;
 
         return $this;
     }
@@ -95,7 +97,7 @@ class Builder
         return $this;
     }
 
-    public function whereBetween(string $column, string|Carbon $start, string|Carbon $end, string $boolean = "and"): self
+    public function whereBetween(string $column, int|string|Carbon $start, int|string|Carbon $end, string $boolean = "and"): self
     {
         if (!count($this->wheres)) {
             $boolean = "where";
@@ -197,6 +199,28 @@ class Builder
         return $this;
     }
 
+    public function having(string|Closure $column, mixed $operator = null, mixed $value = null, string $boolean = "and"): self
+    {
+        if (!count($this->havings)) {
+            $boolean = "having";
+        }
+
+        $this->havings[] = $this->buildHaving($column, $operator, $value, $boolean);
+
+        return $this;
+    }
+
+    public function havingAggregation(string $aggregation, mixed $operator = null, mixed $value = null, string $boolean = "and"): self
+    {
+        if (!count($this->havings)) {
+            $boolean = "having";
+        }
+
+        $this->havings[] = $this->buildHavingAggregation($aggregation, $operator, $value, $boolean);
+
+        return $this;
+    }
+
     public function toSQL(): string
     {
         $sql = "SELECT {$this->buildSelect()} FROM {$this->buildFrom()}";
@@ -205,6 +229,7 @@ class Builder
             $this->buildJoins(),
             $this->buildWheres(),
             $this->buildGroupBy(),
+            $this->buildHavings(),
             $this->buildOrders(),
             $this->buildLimit(),
             $this->buildOffset(),

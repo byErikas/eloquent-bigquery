@@ -25,6 +25,11 @@ class Join
         $this->type = $type;
     }
 
+    public function on(string $column, mixed $operator, mixed $value = null, string $boolean = "on"): self
+    {
+        return $this->where($column, $operator, $value, $boolean);
+    }
+
     public function where(string $column, mixed $operator, mixed $value = null, string $boolean = "and"): self
     {
         if (!count($this->wheres)) {
@@ -55,7 +60,7 @@ class Join
         return $this;
     }
 
-    public function whereBetween(string $column, string|Carbon $start, string|Carbon $end, string $boolean = "and"): self
+    public function whereBetween(string $column, int|string|Carbon $start, int|string|Carbon $end, string $boolean = "and"): self
     {
         if (!count($this->wheres)) {
             $boolean = "on";
