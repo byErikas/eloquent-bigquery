@@ -14,7 +14,7 @@ class Having
     public function having(string $column, mixed $operator = null, mixed $value = null, string $boolean = "and"): self
     {
         if (!count($this->havings)) {
-            $boolean = "having";
+            $boolean = "";
         }
 
         $this->havings[] = $this->buildHaving($column, $operator, $value, $boolean);
@@ -25,7 +25,7 @@ class Having
     public function havingAggregation(string $aggregation, mixed $operator = null, mixed $value = null, string $boolean = "and"): self
     {
         if (!count($this->havings)) {
-            $boolean = "having";
+            $boolean = "";
         }
 
         $this->havings[] = $this->buildHavingAggregation($aggregation, $operator, $value, $boolean);
