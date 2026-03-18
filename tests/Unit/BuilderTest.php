@@ -104,7 +104,7 @@ it("can generate orderBys", function () {
         ->orderBy()
         ->orderBy([["columnA", "desc"], ["columnB"]]);
 
-    expect($query->toSQL())->toBe("SELECT * FROM `test` ORDER BY columnA DESC columnB");
+    expect($query->toSQL())->toBe("SELECT * FROM `test` ORDER BY columnA DESC, columnB");
 });
 
 // it("can generate basic select SQLs with dates, offset, limit and aliases", function () {
