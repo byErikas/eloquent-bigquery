@@ -39,6 +39,6 @@ class Having
             throw new HavingsCantBeEmpty();
         }
 
-        return $this->buildHavings();
+        return "({$this->buildHavings()})";
     }
 }

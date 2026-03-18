@@ -130,11 +130,11 @@ trait BuildsSQLStatements
     private function buildHaving(string|Closure $column, mixed $operator = null, mixed $value = null, ?string $boolean = "and"): string
     {
         if ($column instanceof Closure) {
-            $where = new Having();
+            $having = new Having();
 
-            $column($where);
+            $column($having);
 
-            $result = $where->toSQL();
+            $result = $having->toSQL();
 
             if ($boolean) {
                 $result = strtoupper($boolean) . " {$result}";
