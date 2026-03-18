@@ -47,8 +47,16 @@ Selecting predefined columns or aggregations on queries can be done using `selec
 Builder::table("test")->selectAggregations(["metric-1"]);
 ```
 
-Joins and more complex where statements are supported by using various `join` methods, and by passing a function to the first parameter of `where`:
+Joins are supported using variuos `join` methods. Complex where / having statements are supported by passing a function to the first parameter of `where` / `having` methods:
 ```php
+use ByErikas\EloquentBigQuery\Join;
+
+Builder::table("test")
+  ->select(["column"])
+  ->join("test1", "t1", function (Join $query) {
+    $query->where("time", "test.time");
+  });
+
 use ByErikas\EloquentBigQuery\Where;
 
 Builder::table("test")
@@ -58,14 +66,15 @@ Builder::table("test")
       ->whereBetween("columnB", "1000-01-01", "2000-01-01", "or");
   });
 
-use ByErikas\EloquentBigQuery\Join;
+use ByErikas\EloquentBigQuery\Having;
 
 Builder::table("test")
   ->select(["column"])
-  ->join("test1", "t1", function (Join $query) {
-    $query->where("time", "test.time");
+  ->having(function (Having $query) {
+    $query->having("columnA", 100);
   });
 ```
+
 # Installation
 The package can be installed using:
 ```
