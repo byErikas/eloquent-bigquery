@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Facade;
  *
  * @see \ByErikas\EloquentBigQuery\AggregationsRepository
  */
-class MetricsRepository extends Facade
+class AggregationsRepository extends Facade
 {
     /**
      * Get the registered name of the component.
