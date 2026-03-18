@@ -23,17 +23,17 @@ it("can generate selects", function () {
         ->select(["*"])
         ->selectAggregations(["sumColumn3"]);
 
-    expect($query->toSQL())->toThrow(InvalidSelect::class, "Select can't be \"*\" when using \"selectAggregations\".");
+    expect(fn() => $query->toSQL())->toThrow(InvalidSelect::class, "Select can't be \"*\" when using \"selectAggregations\".");
 
     $query = Builder::table("test")
         ->select([]);
 
-    expect($query->toSQL())->toThrow(InvalidSelect::class, "Select can't be empty.");
+    expect(fn() => $query->toSQL())->toThrow(InvalidSelect::class, "Select can't be empty.");
 
     $query = Builder::table("test")
         ->selectAggregations(["unknownAggregation"]);
 
-    expect($query->toSQL())->toThrow(UndefinedAggregation::class, "Aggregation \"unknownAggregation\" not found, or is of invalid format!");
+    expect(fn() => $query->toSQL())->toThrow(UndefinedAggregation::class, "Aggregation \"unknownAggregation\" not found, or is of invalid format!");
 });
 
 it("can generate wheres", function () {
