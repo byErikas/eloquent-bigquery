@@ -212,9 +212,9 @@ it("can generate havings", function () {
 
     expect($query->toSQL())->toBe("SELECT * FROM `test` HAVING (SUM(column3) = 100 OR column1 != 10)");
 
-    $query = Builder::table("test")
-        ->select(["*"])
-        ->havingAggregation("unknownAggregation", 100);
-
-    expect(fn() => $query->toSQL())->toThrow(UndefinedAggregation::class);
+    expect(function () {
+        return Builder::table("test")
+            ->select(["*"])
+            ->havingAggregation("unknownAggregation", 100)->toSQL();
+    })->toThrow(UndefinedAggregation::class);
 });
