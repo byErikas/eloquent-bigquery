@@ -289,3 +289,27 @@ it("can generate subqueries", function () {
 
     expect($query->toSQL())->toBe("SELECT * FROM (SELECT column1 FROM `test` WHERE column2 = 1) sub WHERE sub.column > 100");
 });
+
+it("can generate when queries", function () {
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->where("column", ">", 100)
+        ->when(function (Builder $query) {
+            return true;
+        }, function (Builder $query) {
+            $query->where("column2", "<", 100);
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE column > 100 AND column2 < 100");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->where("column", ">", 100)
+        ->when(false, function (Builder $query) {
+            $query->where("column2", "<", 100);
+        }, function (Builder $query) {
+            $query->where("column2", ">", 100);
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE column > 100 AND column2 > 100");
+});
