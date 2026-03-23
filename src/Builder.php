@@ -221,6 +221,19 @@ class Builder
         return $this;
     }
 
+    public function when(mixed $value = null, ?callable $callback = null, ?callable $default = null): self
+    {
+        $value = $value instanceof Closure ? $value($this) : $value;
+
+        if ($value) {
+            $callback($this, $value);
+        } elseif ($default) {
+            $default($this, $value);
+        }
+
+        return $this;
+    }
+
     public function toSQL(): string
     {
         $sql = "SELECT {$this->buildSelect()} FROM {$this->buildFrom()}";
