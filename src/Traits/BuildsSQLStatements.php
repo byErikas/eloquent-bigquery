@@ -2,6 +2,7 @@
 
 namespace ByErikas\EloquentBigQuery\Traits;
 
+use ByErikas\EloquentBigQuery\Builder;
 use ByErikas\EloquentBigQuery\Exceptions\InvalidSelect;
 use ByErikas\EloquentBigQuery\Exceptions\UndefinedAggregation;
 use ByErikas\EloquentBigQuery\Facades\AggregationsRepository;
@@ -127,6 +128,15 @@ trait BuildsSQLStatements
         return $join;
     }
 
+    private function buildQueryJoin(Builder $query, string $alias, Closure $closure, string $type = "inner"): Join
+    {
+        $join = new Join($query, $alias, $type);
+
+        $closure($join);
+
+        return $join;
+    }
+
     private function buildHaving(string|Closure $column, mixed $operator = null, mixed $value = null, ?string $boolean = "and"): string
     {
         if ($column instanceof Closure) {
@@ -233,7 +243,10 @@ trait BuildsSQLStatements
         $result = [];
 
         foreach ($this->joins as $join) {
-            $result[] = $join->toSQL();
+            $result[] = match (gettype($join)) {
+                "string" => $join,
+                default => $join->toSQL()
+            };
         }
 
         if (empty($result)) {

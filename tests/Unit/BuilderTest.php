@@ -205,6 +205,52 @@ it("can generate joins", function () {
     expect($query->toSQL())->toBe("SELECT * FROM `test` INNER JOIN `join` j ON j.column BETWEEN 1 AND 100");
 });
 
+it("can generate query joins", function () {
+    $queryJoin = Builder::table("joinTable")
+        ->select(["c1"])
+        ->where("c1", "value");
+
+    $query = Builder::table("table")
+        ->select(["*"])
+        ->queryJoin($queryJoin, "qj", function (Join $join): void {
+            $join->where("c2", "table.c3");
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `table` INNER JOIN (SELECT c1 FROM `joinTable` WHERE c1 = \"value\") qj ON qj.c2 = table.c3");
+
+    $query = Builder::table("table")
+        ->select(["*"])
+        ->queryRightJoin($queryJoin, "qj", function (Join $join): void {
+            $join->where("c2", "table.c3");
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `table` RIGHT JOIN (SELECT c1 FROM `joinTable` WHERE c1 = \"value\") qj ON qj.c2 = table.c3");
+
+    $query = Builder::table("table")
+        ->select(["*"])
+        ->queryLeftJoin($queryJoin, "qj", function (Join $join): void {
+            $join->where("c2", "table.c3");
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `table` LEFT JOIN (SELECT c1 FROM `joinTable` WHERE c1 = \"value\") qj ON qj.c2 = table.c3");
+
+    $query = Builder::table("table")
+        ->select(["*"])
+        ->queryFullJoin($queryJoin, "qj", function (Join $join): void {
+            $join->where("c2", "table.c3");
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `table` FULL JOIN (SELECT c1 FROM `joinTable` WHERE c1 = \"value\") qj ON qj.c2 = table.c3");
+
+    $query = Builder::table("table")
+        ->select(["*"])
+        ->queryCrossJoin($queryJoin, "qj", function (Join $join): void {
+            $join->where("c2", "table.c3");
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `table` CROSS JOIN (SELECT c1 FROM `joinTable` WHERE c1 = \"value\") qj ON qj.c2 = table.c3");
+});
+
 it("can generate havings", function () {
     $query = Builder::table("test")
         ->select(["*"])
