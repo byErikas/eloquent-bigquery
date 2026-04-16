@@ -10,7 +10,7 @@ class Join
 {
     use BuildsSQLStatements;
 
-    private string $table;
+    private Builder|string $table;
 
     private string $alias;
 
@@ -18,7 +18,7 @@ class Join
 
     private array $wheres = [];
 
-    public function __construct(string $table, string $alias, string $type = "inner")
+    public function __construct(Builder|string $table, string $alias, string $type = "inner")
     {
         $this->table = $table;
         $this->alias = $alias;

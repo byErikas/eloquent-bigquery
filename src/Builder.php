@@ -199,6 +199,41 @@ class Builder
         return $this;
     }
 
+    public function queryJoin(Builder $query, string $alias, Closure $closure): self
+    {
+        $this->joins[] = $this->buildQueryJoin($query,  $alias,  $closure);
+
+        return $this;
+    }
+
+    public function queryLeftJoin(Builder $query, string $alias, Closure $closure): self
+    {
+        $this->joins[] = $this->buildQueryJoin($query,  $alias,  $closure, "left");
+
+        return $this;
+    }
+
+    public function queryRightJoin(Builder $query, string $alias, Closure $closure): self
+    {
+        $this->joins[] = $this->buildQueryJoin($query,  $alias,  $closure, "right");
+
+        return $this;
+    }
+
+    public function queryFullJoin(Builder $query, string $alias, Closure $closure): self
+    {
+        $this->joins[] = $this->buildQueryJoin($query, $alias, $closure, "full");
+
+        return $this;
+    }
+
+    public function queryCrossJoin(Builder $query, string $alias, Closure $closure): self
+    {
+        $this->joins[] = $this->buildQueryJoin($query,  $alias, $closure, "cross");
+
+        return $this;
+    }
+
     public function having(string|Closure $column, mixed $operator = null, mixed $value = null, string $boolean = "and"): self
     {
         if (!count($this->havings)) {
