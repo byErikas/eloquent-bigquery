@@ -47,7 +47,7 @@ Selecting predefined columns or aggregations on queries can be done using `selec
 Builder::table("test")->selectAggregations(["metric-1"]);
 ```
 
-Joins are supported using variuos `join` methods. Complex where / having statements are supported by passing a function to the first parameter of `where` / `having` methods:
+Joins are supported using variuos `join` / `queryJoin` methods. Complex `where` / `having` statements are supported by passing a function to the first parameter of `where` / `having` methods:
 ```php
 use ByErikas\EloquentBigQuery\Join;
 
