@@ -2,9 +2,11 @@
 
 namespace ByErikas\EloquentBigQuery;
 
+use ByErikas\EloquentBigQuery\Facades\QueryService;
 use ByErikas\EloquentBigQuery\Traits\BuildsSQLStatements;
 use Closure;
 use Illuminate\Support\Carbon;
+use Google\Cloud\BigQuery\QueryResults;
 
 class Builder
 {
@@ -290,5 +292,10 @@ class Builder
         }
 
         return $sql;
+    }
+
+    public function get(): null|array|QueryResults
+    {
+        return QueryService::query($this)->execute();
     }
 }
