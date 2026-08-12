@@ -127,6 +127,6 @@ trait BuildsWheres
 
         $value = implode(", ", $value);
 
-        return "{$column} LIKE ANY ({$value}";
+        return "{$column} LIKE ANY ({$value})";
     }
 }
