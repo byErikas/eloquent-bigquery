@@ -2,12 +2,6 @@
 
 namespace ByErikas\EloquentBigQuery\Traits;
 
-use ByErikas\EloquentBigQuery\Builder;
-use ByErikas\EloquentBigQuery\Exceptions\InvalidSelect;
-use ByErikas\EloquentBigQuery\Exceptions\UndefinedAggregation;
-use ByErikas\EloquentBigQuery\Facades\AggregationsRepository;
-use ByErikas\EloquentBigQuery\Having;
-use ByErikas\EloquentBigQuery\Join;
 use ByErikas\EloquentBigQuery\Where;
 use Closure;
 use Illuminate\Support\Carbon;
@@ -15,8 +9,6 @@ use Illuminate\Support\Carbon;
 trait BuildsWheres
 {
     use EscapesProperties;
-
-    private const array COMPARISON_OPERATORS = ["=", "!=", ">", ">=", "<", "<=", "<>", "LIKE", "LIKE ANY", "NOT LIKE"];
 
     private function buildWhere(string|Closure $column, mixed $operator = null, mixed $value = null, ?string $boolean = "and"): string
     {
@@ -38,7 +30,7 @@ trait BuildsWheres
             $column = strtoupper($boolean) . " {$column}";
         }
 
-        $isOperator = in_array(strtoupper($operator), self::COMPARISON_OPERATORS);
+        $isOperator = $this->containsComparisonOperator($operator);
 
         $actualValue = $value;
 

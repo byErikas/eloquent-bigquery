@@ -5,6 +5,7 @@ namespace ByErikas\EloquentBigQuery\Traits;
 trait EscapesProperties
 {
     private const string ACCESS_OPERATOR = ".";
+    private const array COMPARISON_OPERATORS = ["=", "!=", ">", ">=", "<", "<=", "<>", "LIKE", "NOT LIKE"];
 
     private function escape(mixed $value): mixed
     {
@@ -22,5 +23,23 @@ trait EscapesProperties
         }
 
         return $value;
+    }
+
+    private function containsAccessOperator(mixed $value): bool
+    {
+        if (gettype($value) == "string") {
+            return str_contains($value, self::ACCESS_OPERATOR);
+        }
+
+        return false;
+    }
+
+    private function containsComparisonOperator(mixed $value): bool
+    {
+        if (gettype($value) == "string") {
+            return in_array(strtoupper($value), self::COMPARISON_OPERATORS);
+        }
+
+        return false;
     }
 }
