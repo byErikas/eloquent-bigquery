@@ -73,6 +73,32 @@ class Join
         return $this;
     }
 
+    public function whereLike(string $column, mixed $value = null, string $boolean = "and"): self
+    {
+        if (!count($this->wheres)) {
+            $boolean = "on";
+        }
+
+        $column = "{$this->alias}.{$column}";
+
+        $this->wheres[] = $this->buildWhereLike($column, $value, $boolean);
+
+        return $this;
+    }
+
+    public function whereLikeAny(string $column, array $value = [], string $boolean = "and"): self
+    {
+        if (!count($this->wheres)) {
+            $boolean = "on";
+        }
+
+        $column = "{$this->alias}.{$column}";
+
+        $this->wheres[] = $this->buildWhereLikeAny($column, $value, $boolean);
+
+        return $this;
+    }
+
     public function toSQL(): string
     {
         if (empty($this->wheres)) {

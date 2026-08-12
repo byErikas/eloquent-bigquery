@@ -359,3 +359,52 @@ it("can generate when queries", function () {
 
     expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE column > 100 AND column2 > 100");
 });
+
+it("can generate whereLike queries", function () {
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->whereLike("column", "%value%")
+        ->whereLikeAny("column2", ["%value1%", "%value2%"]);
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE column LIKE \"%value%\" AND column2 LIKE ANY (\"%value1%\", \"%value2%\")");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->whereLikeAny("column", ["%value1%", "%value2%"]);
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE column LIKE ANY (\"%value1%\", \"%value2%\")");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->where(function (Where $query) {
+            $query->whereLikeAny("column", ["%value1%", "%value2%"]);
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE (column LIKE ANY (\"%value1%\", \"%value2%\"))");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->where(function (Where $query) {
+            $query->whereLike("column", "%value%")
+                ->whereLikeAny("column2", ["%value1%", "%value2%"], "or");
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE (column LIKE \"%value%\" OR column2 LIKE ANY (\"%value1%\", \"%value2%\"))");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->join("join", "j", function (Join $join) {
+            $join->whereLike("column", "%value%")
+                ->whereLikeAny("column2", ["%value1%", "%value2%"], "or");
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` INNER JOIN `join` j ON j.column LIKE \"%value%\" OR j.column2 LIKE ANY (\"%value1%\", \"%value2%\")");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->join("join", "j", function (Join $join) {
+            $join->whereLikeAny("column", ["%value1%", "%value2%"]);
+        });
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` INNER JOIN `join` j ON j.column LIKE ANY (\"%value1%\", \"%value2%\")");
+});
