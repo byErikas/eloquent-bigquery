@@ -12,7 +12,7 @@ trait EscapesProperties
         $type = gettype($value);
 
         if ($type == "string") {
-            $isAccessField = str_contains($value, self::ACCESS_OPERATOR);
+            $isAccessField = $this->containsAccessOperator($value);
             $isEscaped = str_starts_with($value, "\"") && str_ends_with($value, "\"");
 
             if ($isAccessField || $isEscaped) {
