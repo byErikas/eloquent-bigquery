@@ -52,7 +52,7 @@ class Where
     public function whereLike(string $column, mixed $value = null, string $boolean = "and"): self
     {
         if (!count($this->wheres)) {
-            $boolean = "where";
+            $boolean = "";
         }
 
         $this->wheres[] = $this->buildWhereLike($column, $value, $boolean);
@@ -63,7 +63,7 @@ class Where
     public function whereLikeAny(string $column, array $value = [], string $boolean = "and"): self
     {
         if (!count($this->wheres)) {
-            $boolean = "where";
+            $boolean = "";
         }
 
         $this->wheres[] = $this->buildWhereLikeAny($column, $value, $boolean);

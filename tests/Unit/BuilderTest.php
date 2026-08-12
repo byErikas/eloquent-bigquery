@@ -375,7 +375,7 @@ it("can generate whereLike queries", function () {
                 ->whereLikeAny("column2", ["%value1%", "%value2%"], "or");
         });
 
-    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE column LIKE \"%value%\" OR column2 LIKE ANY (\"%value1%\", \"%value2%\")");
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE (column LIKE \"%value%\" OR column2 LIKE ANY (\"%value1%\", \"%value2%\"))");
 
     $query = Builder::table("test")
         ->select(["*"])
