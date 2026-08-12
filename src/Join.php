@@ -79,6 +79,8 @@ class Join
             $boolean = "on";
         }
 
+        $column = "{$this->alias}.{$column}";
+
         $this->wheres[] = $this->buildWhereLike($column, $value, $boolean);
 
         return $this;
@@ -89,6 +91,8 @@ class Join
         if (!count($this->wheres)) {
             $boolean = "on";
         }
+
+        $column = "{$this->alias}.{$column}";
 
         $this->wheres[] = $this->buildWhereLikeAny($column, $value, $boolean);
 
