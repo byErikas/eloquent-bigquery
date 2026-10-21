@@ -47,7 +47,7 @@ trait BuildsSQLStatements
         return $join;
     }
 
-    private function buildHaving(string|Closure $column, mixed $operator = null, mixed $value = null, ?string $boolean = "and"): string
+    private function buildHaving(string|Closure $column, mixed $operator = null, mixed $value = null, ?string $boolean = "and", string $type = "auto"): string
     {
         if ($column instanceof Closure) {
             $having = new Having();
@@ -75,7 +75,7 @@ trait BuildsSQLStatements
             $actualValue = $operator;
         }
 
-        $actualValue = $this->escape($actualValue);
+        $actualValue = $this->escape($actualValue, $type);
 
         if (!$isOperator) {
             return match ($actualValue) {
@@ -87,7 +87,7 @@ trait BuildsSQLStatements
         return "{$column} {$operator} {$actualValue}";
     }
 
-    private function buildHavingAggregation(string $aggregation, mixed $operator = null, mixed $value = null, ?string $boolean = "and"): string
+    private function buildHavingAggregation(string $aggregation, mixed $operator = null, mixed $value = null, ?string $boolean = "and", string $type = "auto"): string
     {
         $aggregationData = AggregationsRepository::find($aggregation);
 
@@ -109,7 +109,7 @@ trait BuildsSQLStatements
             $actualValue = $operator;
         }
 
-        $actualValue = $this->escape($actualValue);
+        $actualValue = $this->escape($actualValue, $type);
 
         if (!$isOperator) {
             return match ($actualValue) {

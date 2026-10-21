@@ -25,12 +25,12 @@ class Join
         $this->type = $type;
     }
 
-    public function on(string $column, mixed $operator, mixed $value = null, string $boolean = "on"): self
+    public function on(string $column, mixed $operator, mixed $value = null, string $boolean = "on", string $type = "auto"): self
     {
-        return $this->where($column, $operator, $value, $boolean);
+        return $this->where($column, $operator, $value, $boolean, $type);
     }
 
-    public function where(string $column, mixed $operator, mixed $value = null, string $boolean = "and"): self
+    public function where(string $column, mixed $operator, mixed $value = null, string $boolean = "and", string $type = "auto"): self
     {
         if (!count($this->wheres)) {
             $boolean = "on";
@@ -38,12 +38,12 @@ class Join
 
         $column = "{$this->alias}.{$column}";
 
-        $this->wheres[] = $this->buildWhere($column, $operator, $value, $boolean);
+        $this->wheres[] = $this->buildWhere($column, $operator, $value, $boolean, $type);
 
         return $this;
     }
 
-    public function whereIn(string $column, array $values, string $boolean = "and"): self
+    public function whereIn(string $column, array $values, string $boolean = "and", string $type = "auto"): self
     {
         if (empty($values)) {
             return $this;
@@ -55,12 +55,12 @@ class Join
 
         $column = "{$this->alias}.{$column}";
 
-        $this->wheres[] = $this->buildWhereIn($column, $values, $boolean);
+        $this->wheres[] = $this->buildWhereIn($column, $values, $boolean, $type);
 
         return $this;
     }
 
-    public function whereBetween(string $column, int|string|Carbon $start, int|string|Carbon $end, string $boolean = "and"): self
+    public function whereBetween(string $column, int|string|Carbon $start, int|string|Carbon $end, string $boolean = "and", string $type = "auto"): self
     {
         if (!count($this->wheres)) {
             $boolean = "on";
@@ -68,12 +68,12 @@ class Join
 
         $column = "{$this->alias}.{$column}";
 
-        $this->wheres[] = $this->buildWhereBetween($column, $start, $end, $boolean);
+        $this->wheres[] = $this->buildWhereBetween($column, $start, $end, $boolean, $type);
 
         return $this;
     }
 
-    public function whereLike(string $column, mixed $value = null, string $boolean = "and"): self
+    public function whereLike(string $column, mixed $value = null, string $boolean = "and", string $type = "auto"): self
     {
         if (!count($this->wheres)) {
             $boolean = "on";
@@ -81,12 +81,12 @@ class Join
 
         $column = "{$this->alias}.{$column}";
 
-        $this->wheres[] = $this->buildWhereLike($column, $value, $boolean);
+        $this->wheres[] = $this->buildWhereLike($column, $value, $boolean, $type);
 
         return $this;
     }
 
-    public function whereLikeAny(string $column, array $value = [], string $boolean = "and"): self
+    public function whereLikeAny(string $column, array $value = [], string $boolean = "and", string $type = "auto"): self
     {
         if (!count($this->wheres)) {
             $boolean = "on";
@@ -94,7 +94,7 @@ class Join
 
         $column = "{$this->alias}.{$column}";
 
-        $this->wheres[] = $this->buildWhereLikeAny($column, $value, $boolean);
+        $this->wheres[] = $this->buildWhereLikeAny($column, $value, $boolean, $type);
 
         return $this;
     }

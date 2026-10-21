@@ -7,9 +7,19 @@ trait EscapesProperties
     private const string ACCESS_OPERATOR = ".";
     private const array COMPARISON_OPERATORS = ["=", "!=", ">", ">=", "<", "<=", "<>", "LIKE", "NOT LIKE"];
 
-    private function escape(mixed $value): mixed
+    private function escape(mixed $value, string $type = "auto"): mixed
     {
-        $type = gettype($value);
+        if (is_array($value)) {
+            foreach ($value as $key => $element) {
+                $value[$key] = $this->escape($element, $type);
+            }
+
+            return $value;
+        }
+
+        if ($type == "auto") {
+            $type = gettype($value);
+        }
 
         if ($type == "string") {
             $isAccessField = $this->containsAccessOperator($value);
@@ -20,6 +30,10 @@ trait EscapesProperties
             }
 
             return "\"{$value}\"";
+        }
+
+        if ($type == "integer") {
+            return intval($value);
         }
 
         return $value;

@@ -62,13 +62,13 @@ class Builder
         return $this;
     }
 
-    public function where(string|Closure $column, mixed $operator = null, mixed $value = null, string $boolean = "and"): self
+    public function where(string|Closure $column, mixed $operator = null, mixed $value = null, string $boolean = "and", string $type = "auto"): self
     {
         if (!count($this->wheres)) {
             $boolean = "where";
         }
 
-        $this->wheres[] = $this->buildWhere($column, $operator, $value, $boolean);
+        $this->wheres[] = $this->buildWhere($column, $operator, $value, $boolean, $type);
 
         return $this;
     }
@@ -84,7 +84,7 @@ class Builder
         return $this;
     }
 
-    public function whereIn(string $column, array $values, string $boolean = "and"): self
+    public function whereIn(string $column, array $values, string $boolean = "and", string $type = "auto"): self
     {
         if (empty($values)) {
             return $this;
@@ -94,40 +94,40 @@ class Builder
             $boolean = "where";
         }
 
-        $this->wheres[] = $this->buildWhereIn($column, $values, $boolean);
+        $this->wheres[] = $this->buildWhereIn($column, $values, $boolean, $type);
 
         return $this;
     }
 
-    public function whereBetween(string $column, int|string|Carbon $start, int|string|Carbon $end, string $boolean = "and"): self
+    public function whereBetween(string $column, int|string|Carbon $start, int|string|Carbon $end, string $boolean = "and", string $type = "auto"): self
     {
         if (!count($this->wheres)) {
             $boolean = "where";
         }
 
-        $this->wheres[] = $this->buildWhereBetween($column, $start, $end, $boolean);
+        $this->wheres[] = $this->buildWhereBetween($column, $start, $end, $boolean, $type);
 
         return $this;
     }
 
-    public function whereLike(string $column, mixed $value = null, string $boolean = "and"): self
+    public function whereLike(string $column, mixed $value = null, string $boolean = "and", string $type = "auto"): self
     {
         if (!count($this->wheres)) {
             $boolean = "where";
         }
 
-        $this->wheres[] = $this->buildWhereLike($column, $value, $boolean);
+        $this->wheres[] = $this->buildWhereLike($column, $value, $boolean, $type);
 
         return $this;
     }
 
-    public function whereLikeAny(string $column, array $value = [], string $boolean = "and"): self
+    public function whereLikeAny(string $column, array $value = [], string $boolean = "and", string $type = "auto"): self
     {
         if (!count($this->wheres)) {
             $boolean = "where";
         }
 
-        $this->wheres[] = $this->buildWhereLikeAny($column, $value, $boolean);
+        $this->wheres[] = $this->buildWhereLikeAny($column, $value, $boolean, $type);
 
         return $this;
     }
@@ -258,24 +258,24 @@ class Builder
         return $this;
     }
 
-    public function having(string|Closure $column, mixed $operator = null, mixed $value = null, string $boolean = "and"): self
+    public function having(string|Closure $column, mixed $operator = null, mixed $value = null, string $boolean = "and", string $type = "auto"): self
     {
         if (!count($this->havings)) {
             $boolean = "having";
         }
 
-        $this->havings[] = $this->buildHaving($column, $operator, $value, $boolean);
+        $this->havings[] = $this->buildHaving($column, $operator, $value, $boolean, $type);
 
         return $this;
     }
 
-    public function havingAggregation(string $aggregation, mixed $operator = null, mixed $value = null, string $boolean = "and"): self
+    public function havingAggregation(string $aggregation, mixed $operator = null, mixed $value = null, string $boolean = "and", string $type = "auto"): self
     {
         if (!count($this->havings)) {
             $boolean = "having";
         }
 
-        $this->havings[] = $this->buildHavingAggregation($aggregation, $operator, $value, $boolean);
+        $this->havings[] = $this->buildHavingAggregation($aggregation, $operator, $value, $boolean, $type);
 
         return $this;
     }

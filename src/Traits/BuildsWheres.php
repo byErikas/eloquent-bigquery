@@ -10,7 +10,7 @@ trait BuildsWheres
 {
     use EscapesProperties;
 
-    private function buildWhere(string|Closure $column, mixed $operator = null, mixed $value = null, ?string $boolean = "and"): string
+    private function buildWhere(string|Closure $column, mixed $operator = null, mixed $value = null, ?string $boolean = "and", string $type = "auto"): string
     {
         if ($column instanceof Closure) {
             $where = new Where();
@@ -38,7 +38,7 @@ trait BuildsWheres
             $actualValue = $operator;
         }
 
-        $actualValue = $this->escape($actualValue);
+        $actualValue = $this->escape($actualValue, $type);
 
         if (!$isOperator) {
             return match ($actualValue) {
@@ -59,24 +59,18 @@ trait BuildsWheres
         return "{$column} IS NOT NULL";
     }
 
-    private function buildWhereIn(string $column, array $values, ?string $boolean = "and"): string
+    private function buildWhereIn(string $column, array $values, ?string $boolean = "and", string $type = "auto"): string
     {
         if ($boolean) {
             $column = strtoupper($boolean) . " {$column}";
         }
 
-        $values = array_map(function (mixed $value) {
-            if (is_numeric($value)) {
-                return $value;
-            }
-
-            return "'{$value}'";
-        }, $values);
+        $values = $this->escape($values, $type);
 
         return "{$column} IN (" . implode(", ", $values) . ")";
     }
 
-    private function buildWhereBetween(string $column, int|string|Carbon $start, int|string|Carbon $end, ?string $boolean = "and"): string
+    private function buildWhereBetween(string $column, int|string|Carbon $start, int|string|Carbon $end, ?string $boolean = "and", string $type = "auto"): string
     {
         if ($boolean) {
             $column = strtoupper($boolean) . " {$column}";
@@ -90,34 +84,30 @@ trait BuildsWheres
             $end = $end->format("Y-m-d H:i:s");
         }
 
-        $start = $this->escape($start);
-        $end = $this->escape($end);
+        $start = $this->escape($start, $type);
+        $end = $this->escape($end, $type);
 
         return "{$column} BETWEEN {$start} AND {$end}";
     }
 
-    private function buildWhereLike(string $column, mixed $value = null, ?string $boolean = "and"): string
+    private function buildWhereLike(string $column, mixed $value = null, ?string $boolean = "and", string $type = "auto"): string
     {
         if ($boolean) {
             $column = strtoupper($boolean) . " {$column}";
         }
 
-        $value = $this->escape($value);
+        $value = $this->escape($value, $type);
 
         return "{$column} LIKE {$value}";
     }
 
-    private function buildWhereLikeAny(string $column, array $value, ?string $boolean = "and"): string
+    private function buildWhereLikeAny(string $column, array $value, ?string $boolean = "and", string $type = "auto"): string
     {
         if ($boolean) {
             $column = strtoupper($boolean) . " {$column}";
         }
 
-        $value = array_map(function (mixed $value) {
-            return $this->escape($value);
-        }, $value);
-
-        $value = implode(", ", $value);
+        $value = implode(", ", $this->escape($value, $type));
 
         return "{$column} LIKE ANY ({$value})";
     }

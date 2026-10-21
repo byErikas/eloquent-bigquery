@@ -1,0 +1,4 @@
+/vendor
+/compose
+composer.lock
+compose.yaml

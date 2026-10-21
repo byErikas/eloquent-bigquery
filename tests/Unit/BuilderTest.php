@@ -89,7 +89,7 @@ it("can generate wheresIns", function () {
         ->whereIn("column2", ["value1", "value2"])
         ->whereIn("column3", [1, 2]);
 
-    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE column2 IN ('value1', 'value2') AND column3 IN (1, 2)");
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE column2 IN (\"value1\", \"value2\") AND column3 IN (1, 2)");
 });
 
 it("can generate whereBetweens", function () {
@@ -407,4 +407,30 @@ it("can generate whereLike queries", function () {
         });
 
     expect($query->toSQL())->toBe("SELECT * FROM `test` INNER JOIN `join` j ON j.column LIKE ANY (\"%value1%\", \"%value2%\")");
+});
+
+it("can apply casts when provided", function () {
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->whereIn("columnA", [1, 2, 3], type: "string");
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE columnA IN (\"1\", \"2\", \"3\")");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->whereIn("columnA", ["a", "b", "c"], type: "integer");
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE columnA IN (0, 0, 0)");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->whereIn("columnA", [1, 2, 3], type: "integer");
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE columnA IN (1, 2, 3)");
+
+    $query = Builder::table("test")
+        ->select(["*"])
+        ->whereIn("columnA", ["1", "2", "3"], type: "integer");
+
+    expect($query->toSQL())->toBe("SELECT * FROM `test` WHERE columnA IN (1, 2, 3)");
 });
